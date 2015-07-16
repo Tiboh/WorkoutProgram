@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.erikbuto.workoutprogram.Manage.ManageProgramActivity">
+    <item android:id="@+id/action_delete"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/action_delete"
+        app:showAsAction="ifRoom" />
+    <item android:id="@+id/action_set_name"
+        android:icon="@drawable/ic_modify"
+        android:title="@string/action_set_name"
+        app:showAsAction="ifRoom" />
+</menu>
