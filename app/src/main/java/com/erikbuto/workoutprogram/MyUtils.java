@@ -12,11 +12,11 @@ public abstract class MyUtils {
         String rep = Integer.toString(set.getNbRep()) + " " + "REP";
 
         if(set.getWeight() == 0){
-            return positionStr + " " + rep;
+            return /*positionStr + " " + */rep;
         }else{
             String X = "x";
             String weight = Integer.toString(set.getWeight()) + "kg";
-            return positionStr + " " + rep + X + weight;
+            return /*positionStr + " " +*/ rep + X + weight;
         }
     }
 

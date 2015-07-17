@@ -1,6 +1,7 @@
 package com.erikbuto.workoutprogram.Manage;
 
 import android.app.Dialog;
+import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -10,6 +11,7 @@ import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Program;
 import com.erikbuto.workoutprogram.DB.Set;
+import com.erikbuto.workoutprogram.Home.MainActivity;
 import com.erikbuto.workoutprogram.R;
 
 import java.util.ArrayList;
@@ -37,10 +39,10 @@ public class DeleteDialogFragment extends DialogFragment {
         final DatabaseHandler db = new DatabaseHandler(getActivity());
         if(getArguments().getString(DeleteDialogFragment.ARG_DATA_TYPE) == ARG_TYPE_PROGRAM) {
             mProgram = db.getProgram(getArguments().getLong(DeleteDialogFragment.ARG_PROGRAM_ID));
-            builder.setTitle(R.string.action_delete + " " + mProgram.getName());
+            builder.setTitle(getString(R.string.action_delete) + " " + mProgram.getName());
         } else {
             mExercise = db.getExercise(getArguments().getLong(DeleteDialogFragment.ARG_EXERCISE_ID));
-            builder.setTitle(R.string.action_delete + " " + mExercise.getName());
+            builder.setTitle(getString(R.string.action_delete) + " " + mExercise.getName());
         }
 
         builder.setMessage(R.string.message_delete)
@@ -51,8 +53,7 @@ public class DeleteDialogFragment extends DialogFragment {
                         } else {
                             deleteExercise(mExercise, db);
                         }
-
-                        getActivity().finish();
+                        ((MainActivity) getActivity()).updateFrameLayoutView(db.getAllPrograms());
                     }
                 })
                 .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {

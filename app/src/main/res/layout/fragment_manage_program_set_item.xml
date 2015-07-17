@@ -1,0 +1,39 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    tools:ignore="UseCompoundDrawables">
+
+
+    <com.nhaarman.listviewanimations.itemmanipulation.dragdrop.GripView
+        android:id="@+id/grip_view"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:color="@android:color/darker_gray"
+        android:paddingBottom="4dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="4dp" />
+
+    <TextView
+        android:id="@+id/set_summary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
+        android:gravity="center_vertical"
+        android:minHeight="40dp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="20sp"
+        tools:ignore="UnusedAttribute" />
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/action_delete_set"
+        android:src="@drawable/ic_cross"
+        android:layout_gravity="center_vertical|right" />
+
+
+</LinearLayout>

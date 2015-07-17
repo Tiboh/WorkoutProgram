@@ -5,44 +5,31 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.content.ClipData;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.GridLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.DragEvent;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.GridView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Set;
+import com.erikbuto.workoutprogram.Home.MainActivity;
+import com.erikbuto.workoutprogram.Home.NewProgramNameDialogFragment;
 import com.erikbuto.workoutprogram.MyUtils;
 import com.erikbuto.workoutprogram.R;
-import com.erikbuto.workoutprogram.TestExerciseCardAdapter;
+import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
+import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.TouchViewDraggableManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -53,10 +40,12 @@ public class ManageProgramFragment extends Fragment {
     private ScrollView mScrollView;
     private ValueAnimator mAnimator;
     private AtomicBoolean mIsScrolling = new AtomicBoolean(false);
+
     private LayoutInflater mLayoutInflater;
 
     private int mIndexStart;
 
+    private long mProgramId;
     private ArrayList<Exercise> mExercises;
 
 
@@ -71,7 +60,10 @@ public class ManageProgramFragment extends Fragment {
 
         mLayoutInflater = LayoutInflater.from(getActivity());
         mGrid = (GridLayout) rootView.findViewById(R.id.grid_layout);
-        mGrid.setOnDragListener(new DragListener());
+        mGrid.setOnDragListener(new CardDragListener());
+
+        mProgramId = getArguments().getLong(ManageProgramFragment.ARG_PROGRAM_ID);
+
 
         return rootView;
     }
@@ -81,7 +73,8 @@ public class ManageProgramFragment extends Fragment {
         super.onResume();
 
         DatabaseHandler db = new DatabaseHandler(getActivity());
-        mExercises = db.getAllExercisesProgram(getActivity().getIntent().getExtras().getLong(ManageProgramFragment.ARG_PROGRAM_ID));
+
+        mExercises = db.getAllExercisesProgram(mProgramId);
         Collections.sort(mExercises, new Exercise.ExerciseComparator());
 
         for(int i = 0 ; i < mExercises.size() ; i++){
@@ -89,33 +82,38 @@ public class ManageProgramFragment extends Fragment {
             final TextView exName = (TextView) itemView.findViewById(R.id.exercise_name);
             exName.setText(mExercises.get(i).getName());
 
-            final TextView exDescription = (TextView) itemView.findViewById(R.id.exercise_description);
-            if(mExercises.get(i).getDescription() != null){
-                exDescription.setText(mExercises.get(i).getDescription());
-            }else{
-                ((ViewGroup) exDescription.getParent()).removeView(exDescription);
-                exName.setGravity(Gravity.CENTER);
-            }
-
             ArrayList<Set> sets = db.getAllSetsExercise(mExercises.get(i).getId());
             if(!sets.isEmpty()){
-                LinearLayout leftLayout = (LinearLayout) itemView.findViewById(R.id.left_layout);
-                for(int j = 0 ; j  < sets.size() ; j++){
-                    TextView setView = new TextView(getActivity());
-                    setView.setText(MyUtils.stringifySet(sets.get(j)));
-                    setView.setTypeface(null, Typeface.BOLD);
-                    leftLayout.addView(setView);
+                ArrayList<String> setsString = new ArrayList<>();
+                for(int j = 0 ; j < sets.size() ; j++){
+                    setsString.add(MyUtils.stringifySet(sets.get(j)));
+                    // setsString.add("Item " + j);
                 }
+
+                DynamicNestedListView dynamicListView = (DynamicNestedListView) itemView.findViewById(R.id.dynamic_list_view);
+                dynamicListView.enableDragAndDrop();
+                dynamicListView.setNestedScrollingEnabled(true);
+                dynamicListView.setDraggableManager(new TouchViewDraggableManager(R.id.grip_view));
+                DynamicListAdapter adapter = new DynamicListAdapter(getActivity(), R.layout.fragment_manage_program_set_item, setsString);
+                dynamicListView.setAdapter(adapter);
+
+                View footerView = mLayoutInflater.inflate(R.layout.add_footer_view, dynamicListView, false);
+                dynamicListView.addFooterView(footerView);
+
+                adapter.notifyDataSetChanged();
             }
+
 
             itemView.setOnLongClickListener(new LongPressListener());
             itemView.setOnClickListener(new ShortPressListener());
 
             mGrid.addView(itemView);
+
         }
     }
 
-    private class DragListener implements View.OnDragListener {
+
+    private class CardDragListener implements View.OnDragListener {
         @Override
         public boolean onDrag(View v, DragEvent event) {
             final View view = (View) event.getLocalState();
@@ -201,9 +199,10 @@ public class ManageProgramFragment extends Fragment {
         @Override
         public void onClick(View view) {
             int mIndexClicked = calculateNewIndex(view.getX(), view.getY());
-            Intent intent = new Intent(getActivity().getBaseContext(), ManageExerciseActivity.class);
+
+            /*Intent intent = new Intent(getActivity().getBaseContext(), ManageExerciseActivity.class);
             intent.putExtra(ManageExerciseActivity.ARG_EXERCISE_ID, mExercises.get(mIndexClicked).getId());
-            startActivity(intent);
+            startActivity(intent);*/
         }
     }
 

@@ -17,14 +17,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Manage.ManageProgramActivity"
-            android:label="@string/title_activity_manage_program" >
-        </activity>
-        <activity
-            android:name=".Manage.ManageExerciseActivity"
-            android:label="@string/title_activity_manage_exercise" >
-        </activity>
     </application>
 
 </manifest>

@@ -22,6 +22,7 @@ import java.util.List;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -35,6 +36,11 @@ import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Program;
 import com.erikbuto.workoutprogram.DB.Set;
+import com.erikbuto.workoutprogram.Manage.DeleteDialogFragment;
+import com.erikbuto.workoutprogram.Manage.ManageProgramFragment;
+import com.erikbuto.workoutprogram.Manage.NewExerciseNameDialogFragment;
+import com.erikbuto.workoutprogram.Manage.NoExercisesFragment;
+import com.erikbuto.workoutprogram.Manage.SetNameDialogFragment;
 import com.erikbuto.workoutprogram.R;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
@@ -44,36 +50,10 @@ import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
-/**
- * This example illustrates a common usage of the DrawerLayout widget
- * in the Android support library.
- * <p/>
- * <p>When a navigation (left) drawer is present, the host activity should detect presses of
- * the action bar's Up affordance as a signal to open and close the navigation drawer. The
- * ActionBarDrawerToggle facilitates this behavior.
- * Items within the drawer should fall into one of two categories:</p>
- * <p/>
- * <ul>
- * <li><strong>View switches</strong>. A view switch follows the same basic policies as
- * list or tab navigation in that a view switch does not create navigation history.
- * This pattern should only be used at the root activity of a task, leaving some form
- * of Up navigation active for activities further down the navigation hierarchy.</li>
- * <li><strong>Selective Up</strong>. The drawer allows the user to choose an alternate
- * parent for Up navigation. This allows a user to jump across an app's navigation
- * hierarchy at will. The application should treat this as it treats Up navigation from
- * a different task, replacing the current task stack using TaskStackBuilder or similar.
- * This is the only form of navigation drawer that should be used outside of the root
- * activity of a task.</li>
- * </ul>
- * <p/>
- * <p>Right side drawers should be used for actions, not navigation. This follows the pattern
- * established by the Action Bar that navigation should be to the left and actions to the right.
- * An action should be an operation performed on the current contents of the window,
- * for example enabling or disabling a data overlay on top of the current content.</p>
- */
 public class MainActivity extends ActionBarActivity {
-    private List<Program> mPrograms;
+    private ArrayList<Program> mPrograms;
     private Program mCurrent;
+    private ArrayList<Exercise> mExercises = new ArrayList<>();
 
     private Drawer mDrawer;
 
@@ -90,12 +70,20 @@ public class MainActivity extends ActionBarActivity {
         mToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(mToolbar);
 
-        populateDB();
-    }
+        if(mCurrent != null) {
+            FloatingActionButton buttonAddExercise = (FloatingActionButton) findViewById(R.id.button_add_exercise);
+            buttonAddExercise.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    NewExerciseNameDialogFragment dialogAddExercise = new NewExerciseNameDialogFragment();
+                    Bundle arg = new Bundle();
+                    arg.putLong(NewExerciseNameDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
+                    dialogAddExercise.setArguments(arg);
+                    dialogAddExercise.show(getSupportFragmentManager(), "TAG");
+                }
+            });
+        }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
         AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.noprogram)
@@ -110,7 +98,7 @@ public class MainActivity extends ActionBarActivity {
                         // .withFooter(R.id.footer)
                 .build();
 
-        DatabaseHandler db = new DatabaseHandler(this);
+        final DatabaseHandler db = new DatabaseHandler(this);
         mPrograms = db.getAllPrograms();
         List<String> programsName = new ArrayList<String>();
         int i = 0;
@@ -134,46 +122,78 @@ public class MainActivity extends ActionBarActivity {
                         .withIdentifier(ID_SETTINGS_ITEM_DRAWER)
         );
 
-        if(!mPrograms.isEmpty()){
-            updateFragment(0);
-        }else{
-            mCurrent = null;
-            FragmentManager fragmentManager = getFragmentManager();
-            Fragment fragment = new NoProgramsFragment();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-        }
+        updateFrameLayoutView(mPrograms);
 
         mDrawer.setOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(AdapterView<?> parent, View view, int position, long id, IDrawerItem drawerItem) {
-                switch(drawerItem.getIdentifier()){
-                    case ID_ADD_ITEM_DRAWER :
+                switch (drawerItem.getIdentifier()) {
+                    case ID_ADD_ITEM_DRAWER:
                         mDrawer.closeDrawer();
-                        NewProgramNameDialogFragment dialog = new NewProgramNameDialogFragment();
-                        dialog.show(getSupportFragmentManager(), "TAG");
+                        Program newProgram = new Program(getString(R.string.new_program));
+                        long newProgramId = db.addProgram(newProgram);
+                        newProgram.setId(newProgramId);
+                        mPrograms.add(newProgram);
+                        mDrawer.addItem(new PrimaryDrawerItem().withName(newProgram.getName()), mPrograms.size()-1);
+                        updateFragment(mPrograms.size()-1);
                         break;
-                    case ID_SETTINGS_ITEM_DRAWER :
+                    case ID_SETTINGS_ITEM_DRAWER:
                         // Intent intent = new Intent(this, SettingsActivity.class);
                         break;
-                    default :
+                    default:
                         updateFragment(position);
                         mDrawer.closeDrawer();
                 }
                 return true;
             }
         });
+
+        // populateDB();
     }
 
-    public void updateFragment(int position){
-        mCurrent = mPrograms.get(position);
-        FragmentManager fragmentManager = getFragmentManager();
-        Fragment fragment = new HomeFragment();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mDrawer.resetDrawerContent();
+    }
 
-        Bundle arg = new Bundle();
-        arg.putLong(HomeFragment.ARG_PROGRAM_ID, mCurrent.getId());
-        arg.putString(HomeFragment.ARG_PROGRAM_NAME, mCurrent.getName());
-        fragment.setArguments(arg);
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+    public Drawer getmDrawer() {
+        return mDrawer;
+    }
+
+    public void updateFrameLayoutView(ArrayList<Program> programs){
+        if(!programs.isEmpty()){
+            updateFragment(0); // TO DO change hard code to updateFragment(last user's choice)
+        }else{
+            mCurrent = null;
+            FragmentManager fragmentManager = getFragmentManager();
+            Fragment fragment = new NoProgramsFragment();
+            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();
+        }
+    }
+
+
+    public void updateFragment(int position){
+        DatabaseHandler db = new DatabaseHandler(this);
+        mCurrent = mPrograms.get(position);
+        mToolbar.setTitle(mCurrent.getName());
+        mExercises = db.getAllExercisesProgram(mCurrent.getId());
+        FragmentManager fragmentManager = getFragmentManager();
+
+        if (mExercises.size() != 0) {
+            Fragment fragment = new ManageProgramFragment();
+            Bundle arg = new Bundle();
+            arg.putLong(ManageProgramFragment.ARG_PROGRAM_ID, mCurrent.getId());
+            fragment.setArguments(arg);
+            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();
+
+        } else {
+            Fragment fragment = new NoExercisesFragment();
+            Bundle arg = new Bundle();
+            arg.putLong(NoExercisesFragment.ARG_PROGRAM_ID, mCurrent.getId());
+            fragment.setArguments(arg);
+            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();
+        }
     }
 
     @Override
@@ -186,9 +206,19 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_home, menu);
+
+        if(mCurrent != null) {
+            if(!mExercises.isEmpty()) {
+                inflater.inflate(R.menu.menu_manage_program, menu);
+            }
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -202,9 +232,25 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // The action bar home/up action should open or close the drawer.
-        // Handle action buttons
-        switch(item.getItemId()) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        Bundle arg = new Bundle();
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                DeleteDialogFragment dialogDelete = new DeleteDialogFragment();
+                arg.putString(DeleteDialogFragment.ARG_DATA_TYPE, DeleteDialogFragment.ARG_TYPE_PROGRAM);
+                arg.putLong(DeleteDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
+                dialogDelete.setArguments(arg);
+                dialogDelete.show(getSupportFragmentManager(), "TAG");
+                return true;
+            case R.id.action_set_name:
+                SetNameDialogFragment dialogSetName = new SetNameDialogFragment();
+                arg.putString(SetNameDialogFragment.ARG_DATA_TYPE, SetNameDialogFragment.ARG_TYPE_PROGRAM);
+                arg.putLong(SetNameDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
+                dialogSetName.setArguments(arg);
+                dialogSetName.show(getSupportFragmentManager(), "TAG");
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

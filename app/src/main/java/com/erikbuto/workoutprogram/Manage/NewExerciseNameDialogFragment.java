@@ -2,7 +2,6 @@ package com.erikbuto.workoutprogram.Manage;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -14,9 +13,6 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
-import com.erikbuto.workoutprogram.DB.Exercise;
-import com.erikbuto.workoutprogram.DB.Program;
-import com.erikbuto.workoutprogram.Manage.ManageProgramActivity;
 import com.erikbuto.workoutprogram.R;
 
 /**
@@ -43,13 +39,13 @@ public class NewExerciseNameDialogFragment extends DialogFragment {
         builder.setTitle(R.string.new_exercise)
                 .setPositiveButton(R.string.abc_action_mode_done, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        String fixed = editText.getText().toString().replaceAll("(\\s)+", " ");
+                        /*String fixed = editText.getText().toString().replaceAll("(\\s)+", " ");
                         Exercise newE = new Exercise(fixed, null, mProgramId, findPositionNewExercise(mProgramId), Exercise.MODE_SIMPLE, null);
                         DatabaseHandler db = new DatabaseHandler(getActivity());
                         long exerciseId = db.addExercise(newE);
                         Intent intent = new Intent(getActivity().getBaseContext(), ManageExerciseActivity.class);
                         intent.putExtra(ManageExerciseActivity.ARG_EXERCISE_ID, exerciseId);
-                        startActivity(intent);
+                        startActivity(intent);*/
                     }
                 })
                 .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {

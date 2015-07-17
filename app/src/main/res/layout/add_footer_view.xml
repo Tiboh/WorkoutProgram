@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/image_add_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_modify"
+        android:layout_gravity="left|center_vertical" />
+
+    <TextView
+        android:id="@+id/label_add_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/action_add"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_gravity="left|center_vertical" />
+</GridLayout>
