@@ -48,5 +48,7 @@
     <string name="label_weight">WGT</string>
     <string name="weight_unit">kg</string>
     <string name="label_rest">RST</string>
+    <string name="new_set">New set</string>
+
 
 </resources>

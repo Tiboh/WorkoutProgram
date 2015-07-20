@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.erikbuto.workoutprogram.DB.Set;
+import com.erikbuto.workoutprogram.MyUtils;
 import com.erikbuto.workoutprogram.R;
 import com.nhaarman.listviewanimations.ArrayAdapter;
 import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.GripView;
@@ -16,14 +18,14 @@ import java.util.ArrayList;
 /**
  * Created by Utilisateur on 17/07/2015.
  */
-public class DynamicListAdapter extends ArrayAdapter<String> {
+public class DynamicListAdapter extends ArrayAdapter<Set> {
 
     private final Context mContext;
-    private ArrayList<String> mItems;
+    private ArrayList<Set> mItems;
     private int mResourceLayoutId;
 
 
-    public DynamicListAdapter(final Context context, int resourceLayoutId, ArrayList<String> items) {
+    public DynamicListAdapter(final Context context, int resourceLayoutId, ArrayList<Set> items) {
         mContext = context;
         mItems = items;
         mResourceLayoutId = resourceLayoutId;
@@ -48,8 +50,9 @@ public class DynamicListAdapter extends ArrayAdapter<String> {
         if (rootView == null) {
             rootView = LayoutInflater.from(mContext).inflate(mResourceLayoutId, parent, false);
         }
+        rootView.setTag(ManageProgramFragment.TAG_LIST_VIEW_SET);
         TextView setSummary = (TextView) rootView.findViewById(R.id.set_summary);
-        setSummary.setText(mItems.get(position));
+        setSummary.setText(MyUtils.stringifySet(mItems.get(position)));
 
         return rootView;
     }
