@@ -17,14 +17,12 @@ import com.nhaarman.listviewanimations.ArrayAdapter;
 /**
  * Created by Utilisateur on 14/07/2015.
  */
-public class NewSetDialogFragment extends DialogFragment {
+public class EditSetDialogFragment extends DialogFragment {
 
-    public static final String ARG_EXERCISE_ID = "exercise_id";
-    public static final String ARG_PREVIOUS_SET_ID = "previous_set_id";
-    public static final String ARG_POSITION = "position";
+    public static final String ARG_SET_ID = "set_id";
 
-    private long mExerciseId;
-    private long mPreviousSetId;
+    private long mSetId;
+    private Set mSet;
 
     private ArrayAdapter mAdapter;
 
@@ -32,9 +30,8 @@ public class NewSetDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         final DatabaseHandler db = new DatabaseHandler(getActivity());
-        mExerciseId = getArguments().getLong(NewSetDialogFragment.ARG_EXERCISE_ID);
-
-
+        mSetId = getArguments().getLong(EditSetDialogFragment.ARG_SET_ID);
+        mSet = db.getSet(mSetId);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -47,24 +44,22 @@ public class NewSetDialogFragment extends DialogFragment {
         final EditText valueRestMinute = (EditText) view.findViewById(R.id.value_rest_minute);
         final EditText valueRestSecond = (EditText) view.findViewById(R.id.value_rest_second);
 
-        if(getArguments().getInt(NewSetDialogFragment.ARG_POSITION) > 0){
-            mPreviousSetId = getArguments().getLong(NewSetDialogFragment.ARG_PREVIOUS_SET_ID);
-            Set previousSet = db.getSet(mPreviousSetId);
-            valueRep.setText(Integer.toString(previousSet.getNbRep()));
-            valueWeight.setText(Integer.toString(previousSet.getWeight()));
-            valueRestMinute.setText(Integer.toString(previousSet.getRestTimeMinute()));
-            valueRestSecond.setText(Integer.toString(previousSet.getRestTimeSecond()));
-        }
+        valueRep.setText(Integer.toString(mSet.getNbRep()));
+        valueWeight.setText(Integer.toString(mSet.getWeight()));
+        valueRestMinute.setText(Integer.toString(mSet.getRestTimeMinute()));
+        valueRestSecond.setText(Integer.toString(mSet.getRestTimeSecond()));
 
-        builder.setTitle(R.string.new_set)
-                .setPositiveButton(R.string.action_add, new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.edit_set)
+                .setPositiveButton(R.string.action_edit, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        int position = getArguments().getInt(NewSetDialogFragment.ARG_POSITION);
-                        Set set = new Set(Integer.valueOf(valueRep.getText().toString()), Integer.valueOf(valueWeight.getText().toString()), Integer.valueOf(valueRestMinute.getText().toString()), Integer.valueOf(valueRestSecond.getText().toString()), mExerciseId, position);
-                        long setId = db.addSet(set);
-                        set.setId(setId);
-                        ((DynamicListAdapter) mAdapter).getmItems().add(set);
-                        mAdapter.add(set);
+                        mSet.setNbRep(Integer.valueOf(valueRep.getText().toString()));
+                        mSet.setWeight(Integer.valueOf(valueWeight.getText().toString()));
+                        mSet.setRestTimeMinute(Integer.valueOf(valueRestMinute.getText().toString()));
+                        mSet.setRestTimeSecond(Integer.valueOf(valueRestSecond.getText().toString()));
+
+                        db.updateSet(mSet);
+                        ((DynamicListAdapter) mAdapter).setItem(mSet.getPosition(), mSet);
+                        mAdapter.notifyDataSetChanged();
                     }
                 })
                 .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {

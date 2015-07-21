@@ -1,15 +1,15 @@
-package com.erikbuto.workoutprogram.Manage;
+package com.erikbuto.workoutprogram.Home;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
-import com.erikbuto.workoutprogram.Home.MainActivity;
-import com.erikbuto.workoutprogram.Home.NewProgramNameDialogFragment;
+import com.erikbuto.workoutprogram.Drawer.MainActivity;
+import com.erikbuto.workoutprogram.Drawer.NewProgramNameDialogFragment;
 import com.erikbuto.workoutprogram.R;
 
 /**
@@ -18,6 +18,7 @@ import com.erikbuto.workoutprogram.R;
 public class NoExercisesFragment extends Fragment {
 
     public static final String ARG_PROGRAM_ID = "program_id";
+
     private long mProgramId;
 
     public NoExercisesFragment() {

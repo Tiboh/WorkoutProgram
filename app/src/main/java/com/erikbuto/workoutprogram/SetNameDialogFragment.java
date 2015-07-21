@@ -1,4 +1,4 @@
-package com.erikbuto.workoutprogram.Manage;
+package com.erikbuto.workoutprogram;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -15,7 +15,6 @@ import android.widget.EditText;
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Program;
-import com.erikbuto.workoutprogram.R;
 
 /**
  * Created by Utilisateur on 14/07/2015.

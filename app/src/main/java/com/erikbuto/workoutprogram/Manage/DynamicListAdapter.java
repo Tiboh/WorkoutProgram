@@ -2,16 +2,16 @@ package com.erikbuto.workoutprogram.Manage;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Set;
 import com.erikbuto.workoutprogram.MyUtils;
 import com.erikbuto.workoutprogram.R;
 import com.nhaarman.listviewanimations.ArrayAdapter;
-import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.GripView;
 
 import java.util.ArrayList;
 
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 public class DynamicListAdapter extends ArrayAdapter<Set> {
 
     private final Context mContext;
+
     private ArrayList<Set> mItems;
     private int mResourceLayoutId;
 
@@ -33,6 +34,16 @@ public class DynamicListAdapter extends ArrayAdapter<Set> {
             add(mItems.get(i));
         }
     }
+
+    public ArrayList<Set> getmItems() {
+        return mItems;
+    }
+
+    public void setItem(int position, Set item) {
+        mItems.add(position, item);
+        mItems.remove(position+1);
+    }
+
 
     @Override
     public long getItemId(final int position) {
@@ -50,9 +61,21 @@ public class DynamicListAdapter extends ArrayAdapter<Set> {
         if (rootView == null) {
             rootView = LayoutInflater.from(mContext).inflate(mResourceLayoutId, parent, false);
         }
-        rootView.setTag(ManageProgramFragment.TAG_LIST_VIEW_SET);
+        rootView.setTag(SetListFragment.TAG_LIST_VIEW_SET);
         TextView setSummary = (TextView) rootView.findViewById(R.id.set_summary);
-        setSummary.setText(MyUtils.stringifySet(mItems.get(position)));
+        setSummary.setText(MyUtils.stringifySet(mItems.get(position), mContext.getString(R.string.set_summary_divider), mContext.getString(R.string.weight_unit), mContext.getString(R.string.label_rep)));
+
+        ImageView deleteButton = (ImageView) rootView.findViewById(R.id.action_delete_set);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final DatabaseHandler db = new DatabaseHandler(mContext);
+                Set set = mItems.get(position);
+                db.deleteSet(set);
+                mItems.remove(set);
+                DynamicListAdapter.this.remove(position);
+            }
+        });
 
         return rootView;
     }

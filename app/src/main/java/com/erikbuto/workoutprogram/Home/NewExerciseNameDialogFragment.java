@@ -1,4 +1,4 @@
-package com.erikbuto.workoutprogram.Manage;
+package com.erikbuto.workoutprogram.Home;
 
 import android.app.Dialog;
 import android.content.DialogInterface;

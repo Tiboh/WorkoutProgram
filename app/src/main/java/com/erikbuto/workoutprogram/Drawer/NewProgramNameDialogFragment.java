@@ -1,9 +1,8 @@
-package com.erikbuto.workoutprogram.Home;
+package com.erikbuto.workoutprogram.Drawer;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;

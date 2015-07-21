@@ -1,38 +1,29 @@
-package com.erikbuto.workoutprogram.Manage;
+package com.erikbuto.workoutprogram.Home;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.app.Fragment;
 import android.content.ClipData;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayout;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
-import android.widget.AdapterView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
-import com.erikbuto.workoutprogram.DB.Set;
-import com.erikbuto.workoutprogram.Home.MainActivity;
-import com.erikbuto.workoutprogram.MyUtils;
+import com.erikbuto.workoutprogram.Manage.ManageExerciseActivity;
 import com.erikbuto.workoutprogram.R;
-import com.nhaarman.listviewanimations.ArrayAdapter;
-import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
-import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.OnItemMovedListener;
-import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.TouchViewDraggableManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -51,8 +42,6 @@ public class ManageProgramFragment extends Fragment {
     private long mProgramId;
     private ArrayList<Exercise> mExercises;
 
-    public static final String TAG_LIST_VIEW_FOOTER = "tag_list_view_footer";
-    public static final String TAG_LIST_VIEW_SET = "tag_list_view_set";
     public static final String ARG_PROGRAM_ID = "program_id";
 
     @Override
@@ -85,30 +74,6 @@ public class ManageProgramFragment extends Fragment {
             View itemView = mLayoutInflater.inflate(R.layout.fragment_manage_program_item, mGrid, false);
             final TextView exName = (TextView) itemView.findViewById(R.id.exercise_name);
             exName.setText(mExercises.get(i).getName());
-
-            final ArrayList<Set> sets = db.getAllSetsExercise(mExercises.get(i).getId());
-            if (!sets.isEmpty()) {
-                Collections.sort(sets, new Set.SetComparator());
-
-                final DynamicNestedListView dynamicListView = (DynamicNestedListView) itemView.findViewById(R.id.dynamic_list_view);
-                dynamicListView.enableDragAndDrop();
-                dynamicListView.setNestedScrollingEnabled(true);
-                dynamicListView.setDraggableManager(new TouchViewDraggableManager(R.id.grip_view));
-                DynamicListAdapter adapter = new DynamicListAdapter(getActivity(), R.layout.fragment_manage_program_set_item, sets);
-                dynamicListView.setAdapter(adapter);
-
-                View footerView = mLayoutInflater.inflate(R.layout.add_footer_view, dynamicListView, false);
-                footerView.setTag(TAG_LIST_VIEW_FOOTER);
-                /*footerView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // Show dialog
-                    }
-                });*/
-                dynamicListView.addFooterView(footerView);
-                dynamicListView.setOnItemMovedListener(new DynamicListViewOnItemMovedListener(adapter));
-                dynamicListView.setOnItemClickListener(new DynamicListViewOnItemClickListener(dynamicListView, mExercises.get(i).getId(), adapter));
-            }
 
             itemView.setOnLongClickListener(new LongPressListener());
             itemView.setOnClickListener(new ShortPressListener());
@@ -205,10 +170,9 @@ public class ManageProgramFragment extends Fragment {
         @Override
         public void onClick(View view) {
             int mIndexClicked = calculateNewIndex(view.getX(), view.getY());
-
-            /*Intent intent = new Intent(getActivity().getBaseContext(), ManageExerciseActivity.class);
+            Intent intent = new Intent(getActivity(), ManageExerciseActivity.class);
             intent.putExtra(ManageExerciseActivity.ARG_EXERCISE_ID, mExercises.get(mIndexClicked).getId());
-            startActivity(intent);*/
+            startActivity(intent);
         }
     }
 
@@ -258,64 +222,6 @@ public class ManageProgramFragment extends Fragment {
     private void stopScrolling() {
         if (mAnimator != null) {
             mAnimator.cancel();
-        }
-    }
-
-    private class DynamicListViewOnItemMovedListener implements OnItemMovedListener {
-
-        private ArrayAdapter<Set> mAdapter;
-
-        DynamicListViewOnItemMovedListener(ArrayAdapter<Set> adapter) {
-            mAdapter = adapter;
-        }
-
-        @Override
-        public void onItemMoved(final int originalPosition, final int newPosition) {
-            ArrayList<Set> swapped = swapSets((ArrayList<Set>) mAdapter.getItems(), originalPosition, newPosition);
-            updateDBSet(swapped);
-        }
-    }
-
-    public ArrayList<Set> swapSets(ArrayList<Set> sets, int indexOne, int indexTwo) {
-        for(int i = 0 ; i < sets.size() ; i++){
-            sets.get(i).setPosition(i);
-        }
-        return sets;
-    }
-
-    private void updateDBSet(ArrayList<Set> sets) {
-        DatabaseHandler db = new DatabaseHandler(getActivity());
-        for (int i = 0; i < sets.size(); i++) {
-            db.updateSet(sets.get(i));
-        }
-    }
-
-
-    private class DynamicListViewOnItemClickListener implements AdapterView.OnItemClickListener {
-
-        private final DynamicListView mListView;
-        private long mExerciseId;
-        private ArrayAdapter mAdapter;
-
-        DynamicListViewOnItemClickListener(final DynamicListView listView, long exerciseId, final ArrayAdapter adapter) {
-            mListView = listView;
-            mExerciseId = exerciseId;
-            mAdapter = adapter;
-        }
-
-        @Override
-        public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-            if(view.getTag() == ManageProgramFragment.TAG_LIST_VIEW_FOOTER){
-                NewSetDialogFragment dialog = new NewSetDialogFragment();
-                Bundle arg = new Bundle();
-                arg.putLong(NewSetDialogFragment.ARG_EXERCISE_ID, mExerciseId);
-                arg.putInt(NewSetDialogFragment.ARG_POSITION, position + 1);
-                dialog.setArguments(arg);
-                dialog.setmAdapter(mAdapter);
-                dialog.show(((MainActivity) getActivity()).getSupportFragmentManager(), "TAG");
-            }else{
-
-            }
         }
     }
 }

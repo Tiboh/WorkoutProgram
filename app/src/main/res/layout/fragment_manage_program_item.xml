@@ -26,10 +26,6 @@
             android:text="Pushups"
             android:textColor="#f44336" />
 
-        <com.erikbuto.workoutprogram.Manage.DynamicNestedListView
-            android:id="@+id/dynamic_list_view"
-            android:layout_width="match_parent"
-            android:layout_height="200dp" />
 
     </LinearLayout>
 

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.erikbuto.workoutprogram.Home;
+package com.erikbuto.workoutprogram.Drawer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -36,11 +36,11 @@ import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Program;
 import com.erikbuto.workoutprogram.DB.Set;
-import com.erikbuto.workoutprogram.Manage.DeleteDialogFragment;
-import com.erikbuto.workoutprogram.Manage.ManageProgramFragment;
-import com.erikbuto.workoutprogram.Manage.NewExerciseNameDialogFragment;
-import com.erikbuto.workoutprogram.Manage.NoExercisesFragment;
-import com.erikbuto.workoutprogram.Manage.SetNameDialogFragment;
+import com.erikbuto.workoutprogram.DeleteDialogFragment;
+import com.erikbuto.workoutprogram.Home.ManageProgramFragment;
+import com.erikbuto.workoutprogram.Home.NewExerciseNameDialogFragment;
+import com.erikbuto.workoutprogram.Home.NoExercisesFragment;
+import com.erikbuto.workoutprogram.SetNameDialogFragment;
 import com.erikbuto.workoutprogram.R;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
@@ -134,8 +134,8 @@ public class MainActivity extends ActionBarActivity {
                         long newProgramId = db.addProgram(newProgram);
                         newProgram.setId(newProgramId);
                         mPrograms.add(newProgram);
-                        mDrawer.addItem(new PrimaryDrawerItem().withName(newProgram.getName()), mPrograms.size()-1);
-                        updateFragment(mPrograms.size()-1);
+                        mDrawer.addItem(new PrimaryDrawerItem().withName(newProgram.getName()), mPrograms.size() - 1);
+                        updateFragment(mPrograms.size() - 1);
                         break;
                     case ID_SETTINGS_ITEM_DRAWER:
                         // Intent intent = new Intent(this, SettingsActivity.class);
@@ -166,7 +166,7 @@ public class MainActivity extends ActionBarActivity {
             updateFragment(0); // TO DO change hard code to updateFragment(last user's choice)
         }else{
             mCurrent = null;
-            FragmentManager fragmentManager = getFragmentManager();
+            FragmentManager fragmentManager = getSupportFragmentManager();
             Fragment fragment = new NoProgramsFragment();
             fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();
         }
@@ -178,7 +178,7 @@ public class MainActivity extends ActionBarActivity {
         mCurrent = mPrograms.get(position);
         mToolbar.setTitle(mCurrent.getName());
         mExercises = db.getAllExercisesProgram(mCurrent.getId());
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
         if (mExercises.size() != 0) {
             Fragment fragment = new ManageProgramFragment();
@@ -186,7 +186,6 @@ public class MainActivity extends ActionBarActivity {
             arg.putLong(ManageProgramFragment.ARG_PROGRAM_ID, mCurrent.getId());
             fragment.setArguments(arg);
             fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();
-
         } else {
             Fragment fragment = new NoExercisesFragment();
             Bundle arg = new Bundle();

@@ -43,12 +43,27 @@
     <string name="title_activity_manage_exercise">ManageExerciseActivity</string>
     <string name="new_exercise">New exercise</string>
 
+    <string name="edit_set">Edit set</string>
+    <string name="action_edit">Edit</string>
+
+
     <string name="action_mode">Simple/Advanced mode</string>
     <string name="label_rep">REP</string>
     <string name="label_weight">WGT</string>
     <string name="weight_unit">kg</string>
     <string name="label_rest">RST</string>
     <string name="new_set">New set</string>
+    <string name="second_unit">\'\'</string>
+    <string name="minute_unit">\'</string>
+    <string name="set_summary_divider">x</string>
+
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+
+    <string name="hello_world">Hello world!</string>
+
+
 
 
 </resources>

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.view.NestedScrollingChild;
 import android.support.v4.view.NestedScrollingChildHelper;
-import android.support.v4.widget.NestedScrollView;
 import android.util.AttributeSet;
 
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;

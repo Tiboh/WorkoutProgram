@@ -16,8 +16,10 @@
             android:inputType="number"
             android:ems="2"
             android:id="@+id/value_rep"
-            android:elegantTextHeight="false"
-            android:maxLines="1" />
+            android:selectAllOnFocus="true"
+            android:nextFocusDown="@+id/value_weight"
+            android:maxLines="1"
+            android:maxLength="3" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -26,6 +28,12 @@
             android:text="@string/label_rep"
             android:id="@+id/label_rep" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/set_summary_divider"
+            android:id="@+id/label_set_summary_divider" />
 
         <EditText
             android:layout_width="wrap_content"
@@ -33,7 +41,10 @@
             android:inputType="number"
             android:ems="3"
             android:id="@+id/value_weight"
-            android:maxLines="1" />
+            android:selectAllOnFocus="true"
+            android:nextFocusDown="@+id/value_rest_minute"
+            android:maxLines="1"
+            android:maxLength="3" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -41,6 +52,13 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/label_weight"
             android:id="@+id/label_weight" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/weight_unit"
+            android:id="@+id/label_unit_weight" />
 
 
     </LinearLayout>
@@ -61,10 +79,37 @@
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="time"
-            android:ems="5"
-            android:id="@+id/value_rest"
-            android:maxLines="1" />
+            android:inputType="number"
+            android:ems="1"
+            android:id="@+id/value_rest_minute"
+            android:selectAllOnFocus="true"
+            android:nextFocusDown="@+id/value_rest_second"
+            android:maxLines="1"
+            android:maxLength="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/minute_unit"
+            android:id="@+id/label_minute_unit" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:ems="2"
+            android:id="@+id/value_rest_second"
+            android:selectAllOnFocus="true"
+            android:maxLines="1"
+            android:maxLength="2" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/second_unit"
+            android:id="@+id/label_second_unit" />
 
 
     </LinearLayout>

@@ -7,16 +7,15 @@ import com.erikbuto.workoutprogram.DB.Set;
  */
 public abstract class MyUtils {
 
-    public static String stringifySet(Set set){
-        String positionStr = stringifyPositionEnglish(set.getPosition()+1);
-        String rep = Integer.toString(set.getNbRep()) + " " + "REP";
+    public static String stringifySet(Set set, String summaryDivider, String weightUnit, String labelRep){
+        String rep = Integer.toString(set.getNbRep()) + " " + labelRep;
 
         if(set.getWeight() == 0){
-            return /*positionStr + " " + */rep;
+            return rep;
         }else{
-            String X = "x";
-            String weight = Integer.toString(set.getWeight()) + "kg";
-            return /*positionStr + " " +*/ rep + X + weight;
+            String X = summaryDivider;
+            String weight = Integer.toString(set.getWeight()) + weightUnit;
+            return rep + X + weight;
         }
     }
 
@@ -43,8 +42,8 @@ public abstract class MyUtils {
         return positionStr;
     }
 
-    public static String stringifyRestTime(int restMinute, int restSeconds){
-        return restMinute + "'" + restSeconds + "''";
+    public static String stringifyRestTime(int restMinute, int restSeconds, String minuteUnit, String secondUnit){
+        return restMinute + minuteUnit + restSeconds + secondUnit;
     }
 
 }
