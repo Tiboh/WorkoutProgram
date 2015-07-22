@@ -18,6 +18,7 @@ import com.erikbuto.workoutprogram.R;
 public class NoExercisesFragment extends Fragment {
 
     public static final String ARG_PROGRAM_ID = "program_id";
+    public static final String TAB_TITLE = "Stats";
 
     private long mProgramId;
 

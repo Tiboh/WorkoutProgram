@@ -17,29 +17,40 @@
 package com.erikbuto.workoutprogram.Drawer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Program;
 import com.erikbuto.workoutprogram.DB.Set;
 import com.erikbuto.workoutprogram.DeleteDialogFragment;
+import com.erikbuto.workoutprogram.Home.CardViewAdapter;
 import com.erikbuto.workoutprogram.Home.ManageProgramFragment;
 import com.erikbuto.workoutprogram.Home.NewExerciseNameDialogFragment;
 import com.erikbuto.workoutprogram.Home.NoExercisesFragment;
+import com.erikbuto.workoutprogram.Home.TabsAdapter;
 import com.erikbuto.workoutprogram.SetNameDialogFragment;
 import com.erikbuto.workoutprogram.R;
 import com.mikepenz.materialdrawer.Drawer;
@@ -61,28 +72,19 @@ public class MainActivity extends ActionBarActivity {
     public static final int ID_ADD_ITEM_DRAWER = 0;
     public static final int ID_SETTINGS_ITEM_DRAWER = 1;
 
+    private RecyclerView mRecyclerView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // populateDB();
+
         mToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(mToolbar);
-
-        if(mCurrent != null) {
-            FloatingActionButton buttonAddExercise = (FloatingActionButton) findViewById(R.id.button_add_exercise);
-            buttonAddExercise.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    NewExerciseNameDialogFragment dialogAddExercise = new NewExerciseNameDialogFragment();
-                    Bundle arg = new Bundle();
-                    arg.putLong(NewExerciseNameDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
-                    dialogAddExercise.setArguments(arg);
-                    dialogAddExercise.show(getSupportFragmentManager(), "TAG");
-                }
-            });
-        }
 
         AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
@@ -148,7 +150,52 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        // populateDB();
+        if(mCurrent != null) {
+            FloatingActionButton buttonAddExercise = (FloatingActionButton) findViewById(R.id.button_add_exercise);
+            buttonAddExercise.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    NewExerciseNameDialogFragment dialogAddExercise = new NewExerciseNameDialogFragment();
+                    Bundle arg = new Bundle();
+                    arg.putLong(NewExerciseNameDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
+                    dialogAddExercise.setArguments(arg);
+                    dialogAddExercise.show(getSupportFragmentManager(), "TAG");
+                }
+            });
+            // ((CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar)).setTitle(mCurrent.getName());
+            ((TextView) findViewById(R.id.toolbar_title)).setText(mCurrent.getName());
+
+            TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+
+            final ViewPager pager = (ViewPager) findViewById(R.id.pager);
+            final TabsAdapter tabsAdapter = new TabsAdapter(this, pager);
+            pager.setAdapter(tabsAdapter);
+
+            Bundle argManageProgramFragment = new Bundle();
+            argManageProgramFragment.putLong(ManageProgramFragment.ARG_PROGRAM_ID, mCurrent.getId());
+            tabsAdapter.addTab(tabLayout.newTab(), ManageProgramFragment.class, argManageProgramFragment, ManageProgramFragment.TAB_TITLE);
+            tabsAdapter.addTab(tabLayout.newTab(), NoExercisesFragment.class, argManageProgramFragment, NoExercisesFragment.TAB_TITLE);
+
+            tabLayout.setTabsFromPagerAdapter(tabsAdapter);
+            tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+
+                }
+
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+
+                }
+
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+
+                }
+            });
+
+            pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        }
     }
 
     @Override
@@ -166,9 +213,10 @@ public class MainActivity extends ActionBarActivity {
             updateFragment(0); // TO DO change hard code to updateFragment(last user's choice)
         }else{
             mCurrent = null;
-            FragmentManager fragmentManager = getSupportFragmentManager();
+            ///// TO DO
+            /*FragmentManager fragmentManager = getSupportFragmentManager();
             Fragment fragment = new NoProgramsFragment();
-            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();*/
         }
     }
 
@@ -176,22 +224,22 @@ public class MainActivity extends ActionBarActivity {
     public void updateFragment(int position){
         DatabaseHandler db = new DatabaseHandler(this);
         mCurrent = mPrograms.get(position);
-        mToolbar.setTitle(mCurrent.getName());
+        //mToolbar.setTitle(mCurrent.getName());
         mExercises = db.getAllExercisesProgram(mCurrent.getId());
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         if (mExercises.size() != 0) {
-            Fragment fragment = new ManageProgramFragment();
+            /*Fragment fragment = new ManageProgramFragment();
             Bundle arg = new Bundle();
             arg.putLong(ManageProgramFragment.ARG_PROGRAM_ID, mCurrent.getId());
             fragment.setArguments(arg);
-            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();*/
         } else {
-            Fragment fragment = new NoExercisesFragment();
+            /*Fragment fragment = new NoExercisesFragment();
             Bundle arg = new Bundle();
             arg.putLong(NoExercisesFragment.ARG_PROGRAM_ID, mCurrent.getId());
             fragment.setArguments(arg);
-            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();*/
         }
     }
 

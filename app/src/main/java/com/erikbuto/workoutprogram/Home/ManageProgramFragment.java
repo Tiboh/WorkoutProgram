@@ -9,6 +9,8 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,21 +44,25 @@ public class ManageProgramFragment extends Fragment {
     private long mProgramId;
     private ArrayList<Exercise> mExercises;
 
+    private RecyclerView mRecyclerView;
+
     public static final String ARG_PROGRAM_ID = "program_id";
+    public static final String TAB_TITLE = "Exercises";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_manage_program, container, false);
-        mScrollView = (ScrollView) rootView.findViewById(R.id.scroll_view);
-        mScrollView.setSmoothScrollingEnabled(true);
-
-        mLayoutInflater = LayoutInflater.from(getActivity());
-        mGrid = (GridLayout) rootView.findViewById(R.id.grid_layout);
-        mGrid.setOnDragListener(new CardDragListener());
-
         mProgramId = getArguments().getLong(ManageProgramFragment.ARG_PROGRAM_ID);
 
+        DatabaseHandler db = new DatabaseHandler(getActivity());
+        mExercises = db.getAllExercisesProgram(mProgramId);
+        Collections.sort(mExercises, new Exercise.ExerciseComparator());
+
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        // mRecyclerView.setLayoutManager(new GridLayoutManager(this,2));
+        mRecyclerView.setAdapter(new CardViewAdapter(mExercises));
 
         return rootView;
     }
@@ -65,22 +71,6 @@ public class ManageProgramFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        DatabaseHandler db = new DatabaseHandler(getActivity());
-
-        mExercises = db.getAllExercisesProgram(mProgramId);
-        Collections.sort(mExercises, new Exercise.ExerciseComparator());
-
-        for (int i = 0; i < mExercises.size(); i++) {
-            View itemView = mLayoutInflater.inflate(R.layout.fragment_manage_program_item, mGrid, false);
-            final TextView exName = (TextView) itemView.findViewById(R.id.exercise_name);
-            exName.setText(mExercises.get(i).getName());
-
-            itemView.setOnLongClickListener(new LongPressListener());
-            itemView.setOnClickListener(new ShortPressListener());
-
-            mGrid.addView(itemView);
-
-        }
     }
 
 
