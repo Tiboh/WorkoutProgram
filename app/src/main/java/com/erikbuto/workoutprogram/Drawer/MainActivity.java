@@ -1,44 +1,25 @@
-/*
- * Copyright 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.erikbuto.workoutprogram.Drawer;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
@@ -46,7 +27,6 @@ import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Program;
 import com.erikbuto.workoutprogram.DB.Set;
 import com.erikbuto.workoutprogram.DeleteDialogFragment;
-import com.erikbuto.workoutprogram.Home.CardViewAdapter;
 import com.erikbuto.workoutprogram.Home.ManageProgramFragment;
 import com.erikbuto.workoutprogram.Home.NewExerciseNameDialogFragment;
 import com.erikbuto.workoutprogram.Home.NoExercisesFragment;
@@ -67,17 +47,15 @@ public class MainActivity extends ActionBarActivity {
     private ArrayList<Exercise> mExercises = new ArrayList<>();
 
     private Drawer mDrawer;
-
-    private Toolbar mToolbar;
+    private int mSelectedItemDrawerPosition;
     public static final int ID_ADD_ITEM_DRAWER = 0;
     public static final int ID_SETTINGS_ITEM_DRAWER = 1;
 
-    private RecyclerView mRecyclerView;
-
+    private Toolbar mToolbar;
+    private TextView mTitleView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -85,7 +63,37 @@ public class MainActivity extends ActionBarActivity {
 
         mToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setTitle("");
 
+        final int PROGRAM_GROUP_ID = 0;
+        final int OTHER_GROUP_ID = 0;
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        Menu menu = navigationView.getMenu();
+
+        SubMenu parent1 = menu.addSubMenu("SubMenu1");
+        SubMenu parent2 = menu.addSubMenu("SubMenu2");
+
+        parent1.add("Item1-1");
+        parent1.add("Item1-2");
+        parent1.add("Item1-3");
+
+        parent2.add("Item2-1");
+        parent2.add("Item2-2");
+
+        for (int i = 0, count = navigationView.getChildCount(); i < count; i++) {
+            final View child = navigationView.getChildAt(i);
+            if (child != null && child instanceof ListView) {
+                final ListView menuView = (ListView) child;
+                final HeaderViewListAdapter adapter = (HeaderViewListAdapter) menuView.getAdapter();
+                final BaseAdapter wrapped = (BaseAdapter) adapter.getWrappedAdapter();
+                wrapped.notifyDataSetChanged();
+            }
+        }
+
+        // buildDrawer();
+    }
+
+    public void buildDrawer() {
         AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.noprogram)
@@ -109,22 +117,9 @@ public class MainActivity extends ActionBarActivity {
             mDrawer.addItem(new PrimaryDrawerItem().withName(cn.getName()), i);
             i++;
         }
+        addLastItemsDrawer(mDrawer);
 
-        mDrawer.addItem(new PrimaryDrawerItem()
-                        .withName(R.string.action_add)
-                        .withIcon(R.drawable.ic_add_black)
-                        .withIdentifier(ID_ADD_ITEM_DRAWER)
-        );
-
-        mDrawer.addItem(new DividerDrawerItem());
-
-        mDrawer.addItem(new PrimaryDrawerItem()
-                        .withName(R.string.action_settings)
-                        .withIcon(R.drawable.ic_settings_black_48dp)
-                        .withIdentifier(ID_SETTINGS_ITEM_DRAWER)
-        );
-
-        updateFrameLayoutView(mPrograms);
+        updateFragmentView(mPrograms);
 
         mDrawer.setOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
@@ -136,111 +131,153 @@ public class MainActivity extends ActionBarActivity {
                         long newProgramId = db.addProgram(newProgram);
                         newProgram.setId(newProgramId);
                         mPrograms.add(newProgram);
+                        removeLastItemsDrawer(mDrawer);
                         mDrawer.addItem(new PrimaryDrawerItem().withName(newProgram.getName()), mPrograms.size() - 1);
-                        updateFragment(mPrograms.size() - 1);
+                        addLastItemsDrawer(mDrawer);
+                        updateProgramFragment(mPrograms.size() - 1);
                         break;
                     case ID_SETTINGS_ITEM_DRAWER:
                         // Intent intent = new Intent(this, SettingsActivity.class);
                         break;
                     default:
-                        updateFragment(position);
+                        updateProgramFragment(position);
                         mDrawer.closeDrawer();
                 }
                 return true;
             }
         });
+    }
 
-        if(mCurrent != null) {
-            FloatingActionButton buttonAddExercise = (FloatingActionButton) findViewById(R.id.button_add_exercise);
-            buttonAddExercise.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    NewExerciseNameDialogFragment dialogAddExercise = new NewExerciseNameDialogFragment();
-                    Bundle arg = new Bundle();
-                    arg.putLong(NewExerciseNameDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
-                    dialogAddExercise.setArguments(arg);
-                    dialogAddExercise.show(getSupportFragmentManager(), "TAG");
-                }
-            });
-            // ((CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar)).setTitle(mCurrent.getName());
-            ((TextView) findViewById(R.id.toolbar_title)).setText(mCurrent.getName());
+    public void removeLastItemsDrawer(Drawer drawer){
+        int drawerSize = drawer.getDrawerItems().size();
+        drawer.removeItem(drawerSize-1);
+        drawer.removeItem(drawerSize);
+        drawer.removeItem(drawerSize+1);
+    }
 
-            TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+    public void addLastItemsDrawer(Drawer drawer){
+        drawer.addItem(new PrimaryDrawerItem()
+                        .withName(R.string.action_add)
+                        .withIcon(R.drawable.ic_add_black)
+                        .withIdentifier(ID_ADD_ITEM_DRAWER)
+        );
 
-            final ViewPager pager = (ViewPager) findViewById(R.id.pager);
-            final TabsAdapter tabsAdapter = new TabsAdapter(this, pager);
-            pager.setAdapter(tabsAdapter);
+        drawer.addItem(new DividerDrawerItem());
 
-            Bundle argManageProgramFragment = new Bundle();
-            argManageProgramFragment.putLong(ManageProgramFragment.ARG_PROGRAM_ID, mCurrent.getId());
-            tabsAdapter.addTab(tabLayout.newTab(), ManageProgramFragment.class, argManageProgramFragment, ManageProgramFragment.TAB_TITLE);
-            tabsAdapter.addTab(tabLayout.newTab(), NoExercisesFragment.class, argManageProgramFragment, NoExercisesFragment.TAB_TITLE);
+        drawer.addItem(new PrimaryDrawerItem()
+                        .withName(R.string.action_settings)
+                        .withIcon(R.drawable.ic_settings_black_48dp)
+                        .withIdentifier(ID_SETTINGS_ITEM_DRAWER)
+        );
+    }
 
-            tabLayout.setTabsFromPagerAdapter(tabsAdapter);
-            tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-                @Override
-                public void onTabSelected(TabLayout.Tab tab) {
-
-                }
-
-                @Override
-                public void onTabUnselected(TabLayout.Tab tab) {
-
-                }
-
-                @Override
-                public void onTabReselected(TabLayout.Tab tab) {
-
-                }
-            });
-
-            pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        }
+    public void onProgramNameChanged(String newName) {
+        mTitleView.setText(newName);
+        mDrawer.removeItem(mSelectedItemDrawerPosition);
+        mDrawer.addItem(new PrimaryDrawerItem().withName(newName), mSelectedItemDrawerPosition);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mDrawer.resetDrawerContent();
+        // mDrawer.resetDrawerContent();
     }
 
     public Drawer getmDrawer() {
         return mDrawer;
     }
 
-    public void updateFrameLayoutView(ArrayList<Program> programs){
-        if(!programs.isEmpty()){
-            updateFragment(0); // TO DO change hard code to updateFragment(last user's choice)
-        }else{
+    public void updateFragmentView(ArrayList<Program> programs) {
+        if (!programs.isEmpty()) {
+            updateProgramFragment(0); // TO DO change hard code to updateProgramFragment(last user's choice)
+        } else {
             mCurrent = null;
-            ///// TO DO
-            /*FragmentManager fragmentManager = getSupportFragmentManager();
-            Fragment fragment = new NoProgramsFragment();
-            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();*/
+            ///// TO DO inflate NoPrograms layout
         }
     }
 
-
-    public void updateFragment(int position){
+    public void updateProgramFragment(int position) {
         DatabaseHandler db = new DatabaseHandler(this);
         mCurrent = mPrograms.get(position);
-        //mToolbar.setTitle(mCurrent.getName());
+        mSelectedItemDrawerPosition = position;
         mExercises = db.getAllExercisesProgram(mCurrent.getId());
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        buildProgramActivity();
+    }
 
-        if (mExercises.size() != 0) {
-            /*Fragment fragment = new ManageProgramFragment();
-            Bundle arg = new Bundle();
-            arg.putLong(ManageProgramFragment.ARG_PROGRAM_ID, mCurrent.getId());
-            fragment.setArguments(arg);
-            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();*/
-        } else {
-            /*Fragment fragment = new NoExercisesFragment();
-            Bundle arg = new Bundle();
-            arg.putLong(NoExercisesFragment.ARG_PROGRAM_ID, mCurrent.getId());
-            fragment.setArguments(arg);
-            fragmentManager.beginTransaction().replace(R.id.content_frame_program, fragment).commit();*/
+    public void buildProgramActivity() {
+        FloatingActionButton buttonAddExercise = (FloatingActionButton) findViewById(R.id.button_add_exercise);
+        buttonAddExercise.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NewExerciseNameDialogFragment dialogAddExercise = new NewExerciseNameDialogFragment();
+                Bundle arg = new Bundle();
+                arg.putLong(NewExerciseNameDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
+                dialogAddExercise.setArguments(arg);
+                dialogAddExercise.show(getSupportFragmentManager(), "TAG");
+            }
+        });
+        // ((CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar)).setTitle(mCurrent.getName());
+        mTitleView = (TextView) findViewById(R.id.toolbar_title);
+        mTitleView.setText(mCurrent.getName());
+        mTitleView.setFocusableInTouchMode(true);
+        mTitleView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle arg = new Bundle();
+                SetNameDialogFragment dialogSetName = new SetNameDialogFragment();
+                arg.putString(SetNameDialogFragment.ARG_DATA_TYPE, SetNameDialogFragment.ARG_TYPE_PROGRAM);
+                arg.putLong(SetNameDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
+                dialogSetName.setArguments(arg);
+                dialogSetName.show(getSupportFragmentManager(), "TAG");
+            }
+        });
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+
+        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        TabsAdapter tabsAdapter = new TabsAdapter(this, pager);
+        pager.setAdapter(tabsAdapter);
+
+        FloatingActionButton runProgramButton = (FloatingActionButton) findViewById(R.id.button_run_program);
+        if(!mExercises.isEmpty()) {
+            runProgramButton.setEnabled(true);
+            runProgramButton.setBackgroundTintList(getResources().getColorStateList(R.color.accent));
+
+            Bundle argManageProgramFragment = new Bundle();
+            argManageProgramFragment.putLong(ManageProgramFragment.ARG_PROGRAM_ID, mCurrent.getId());
+            tabsAdapter.addTab(tabLayout.newTab(), ManageProgramFragment.class, argManageProgramFragment, getString(R.string.tab_title_exercises));
+
+            Bundle argNoExercisesFragment = new Bundle();
+            argNoExercisesFragment.putLong(NoExercisesFragment.ARG_PROGRAM_ID, mCurrent.getId());
+            tabsAdapter.addTab(tabLayout.newTab(), NoExercisesFragment.class, argNoExercisesFragment, getString(R.string.tab_title_stats));
+        }else{
+            runProgramButton.setEnabled(false);
+            runProgramButton.setBackgroundTintList(getResources().getColorStateList(R.color.divider));
+
+            Bundle argNoExercisesFragment = new Bundle();
+            argNoExercisesFragment.putLong(NoExercisesFragment.ARG_PROGRAM_ID, mCurrent.getId());
+            tabsAdapter.addTab(tabLayout.newTab(), NoExercisesFragment.class, argNoExercisesFragment, getString(R.string.tab_title_exercises));
+            tabsAdapter.addTab(tabLayout.newTab(), NoExercisesFragment.class, argNoExercisesFragment, getString(R.string.tab_title_stats));
         }
+
+        tabLayout.setTabsFromPagerAdapter(tabsAdapter);
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+        pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
     }
 
     @Override
@@ -261,8 +298,8 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
 
-        if(mCurrent != null) {
-            if(!mExercises.isEmpty()) {
+        if (mCurrent != null) {
+            if (!mExercises.isEmpty()) {
                 inflater.inflate(R.menu.menu_manage_program, menu);
             }
         }
@@ -303,7 +340,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    private void populateDB(){
+    private void populateDB() {
         DatabaseHandler db = new DatabaseHandler(this);
         db.deleteAllPrograms();
         long idRavi = db.addProgram(new Program("Half-body"));

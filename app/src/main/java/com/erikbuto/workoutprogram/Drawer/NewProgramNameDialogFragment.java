@@ -101,6 +101,6 @@ public class NewProgramNameDialogFragment extends DialogFragment {
         db.deleteProgram(mProgram);
         ArrayList<Program> programs = db.getAllPrograms();
         ((MainActivity) getActivity()).getmDrawer().removeItem(programs.size()); // Delete New program
-        ((MainActivity) getActivity()).updateFrameLayoutView(programs); // Go to previous go program
+        ((MainActivity) getActivity()).updateFragmentView(programs); // Go to previous go program
     }
 }

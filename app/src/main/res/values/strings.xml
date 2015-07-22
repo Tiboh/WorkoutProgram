@@ -32,7 +32,7 @@
     <string name="title_activity_manage_program">ManageProgramActivity</string>
     <string name="name">Name</string>
     <string name="new_program">New program</string>
-    <string name="action_set_name">Set name</string>
+    <string name="action_set_name">Edit name</string>
     <string name="action_sort_exercises">Sort exercises</string>
     <string name="no_exercises">Impossible action. Any exercises.</string>
 
@@ -66,6 +66,10 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="tab_title_exercises">Exercises</string>
+    <string name="tab_title_stats">Stats</string>
+    <string name="title_activity_main_activity2">MainActivity2</string>
 
     <string name="action_example">Example action</string>
 

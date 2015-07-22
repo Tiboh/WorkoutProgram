@@ -15,6 +15,7 @@ import android.widget.EditText;
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Program;
+import com.erikbuto.workoutprogram.Drawer.MainActivity;
 
 /**
  * Created by Utilisateur on 14/07/2015.
@@ -58,12 +59,13 @@ public class SetNameDialogFragment extends DialogFragment {
                         if(getArguments().getString(SetNameDialogFragment.ARG_DATA_TYPE) == ARG_TYPE_PROGRAM) {
                             mProgram.setName(fixed);
                             db.updateProgram(mProgram);
+                            ((MainActivity) getActivity()).onProgramNameChanged(fixed);
                         } else {
                             mExercise.setName(fixed);
                             db.updateExercise(mExercise);
+                            getActivity().setTitle(fixed);
                         }
 
-                        getActivity().setTitle(fixed);
                         SetNameDialogFragment.this.getDialog().dismiss();
                     }
                 })

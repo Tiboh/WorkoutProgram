@@ -5,9 +5,9 @@
     <item android:id="@+id/action_delete"
         android:icon="@drawable/ic_delete"
         android:title="@string/action_delete"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
     <item android:id="@+id/action_set_name"
         android:icon="@drawable/ic_modify"
         android:title="@string/action_set_name"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 </menu>

@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayout;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.DragEvent;
@@ -60,8 +61,8 @@ public class ManageProgramFragment extends Fragment {
         Collections.sort(mExercises, new Exercise.ExerciseComparator());
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        // mRecyclerView.setLayoutManager(new GridLayoutManager(this,2));
+        // mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
         mRecyclerView.setAdapter(new CardViewAdapter(mExercises));
 
         return rootView;

@@ -51,7 +51,7 @@ public class DeleteDialogFragment extends DialogFragment {
                         } else {
                             deleteExercise(mExercise, db);
                         }
-                        ((MainActivity) getActivity()).updateFrameLayoutView(db.getAllPrograms());
+                        ((MainActivity) getActivity()).updateFragmentView(db.getAllPrograms());
                     }
                 })
                 .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {

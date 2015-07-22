@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/navigation_subheader"
+            android:title="@string/title_activity_manage_program">
+            <menu>
+                <item
+                    android:id="@+id/navigation_item_1"
+                    android:checked="true"
+                    android:icon="@drawable/ic_run"
+                    android:title="@string/edit_name" />
+                <item
+                    android:id="@+id/navigation_item_2"
+                    android:icon="@drawable/ic_check"
+                    android:title="@string/action_example" />
+            </menu>
+        </item>
+    </group>
+</menu>
