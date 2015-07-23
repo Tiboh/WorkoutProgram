@@ -35,10 +35,6 @@ public class DynamicListAdapter extends ArrayAdapter<Set> {
         }
     }
 
-    public ArrayList<Set> getmItems() {
-        return mItems;
-    }
-
     public void setItem(int position, Set item) {
         mItems.add(position, item);
         mItems.remove(position+1);
@@ -61,7 +57,6 @@ public class DynamicListAdapter extends ArrayAdapter<Set> {
         if (rootView == null) {
             rootView = LayoutInflater.from(mContext).inflate(mResourceLayoutId, parent, false);
         }
-        rootView.setTag(SetListFragment.TAG_LIST_VIEW_SET);
         TextView setSummary = (TextView) rootView.findViewById(R.id.set_summary);
         setSummary.setText(MyUtils.stringifySet(mItems.get(position), mContext.getString(R.string.set_summary_divider), mContext.getString(R.string.weight_unit), mContext.getString(R.string.label_rep)));
 

@@ -1,13 +1,15 @@
 package com.erikbuto.workoutprogram.Drawer;
 
 import java.util.ArrayList;
-import java.util.List;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -15,10 +17,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.HeaderViewListAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -31,25 +31,28 @@ import com.erikbuto.workoutprogram.Home.ManageProgramFragment;
 import com.erikbuto.workoutprogram.Home.NewExerciseNameDialogFragment;
 import com.erikbuto.workoutprogram.Home.NoExercisesFragment;
 import com.erikbuto.workoutprogram.Home.TabsAdapter;
+import com.erikbuto.workoutprogram.Manage.ManageExerciseActivity;
+import com.erikbuto.workoutprogram.Manage.SetListFragment;
 import com.erikbuto.workoutprogram.SetNameDialogFragment;
 import com.erikbuto.workoutprogram.R;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.accountswitcher.AccountHeader;
-import com.mikepenz.materialdrawer.accountswitcher.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 public class MainActivity extends ActionBarActivity {
     private ArrayList<Program> mPrograms;
-    private Program mCurrent;
+    private Program mProgram;
     private ArrayList<Exercise> mExercises = new ArrayList<>();
 
-    private Drawer mDrawer;
+    private DrawerLayout mDrawer;
+    private NavigationView mNavigationView;
+    private SubMenu mProgramSubMenu;
+    private Menu mDrawerMenu;
     private int mSelectedItemDrawerPosition;
-    public static final int ID_ADD_ITEM_DRAWER = 0;
-    public static final int ID_SETTINGS_ITEM_DRAWER = 1;
+    public static final int ID_ADD_ITEM_DRAWER = -1;
+    public static final int ID_SETTINGS_ITEM_DRAWER = -2;
+    public static final int PROGRAM_DRAWER_GROUP_ID = 0;
+    public static final int OTHER_DRAWER_GROUP_ID = 1;
+
+    public static final int POSITION_EXERCISE_TAB = 0;
+    public static final int POSITION_STATS_TAB = 1;
 
     private Toolbar mToolbar;
     private TextView mTitleView;
@@ -57,31 +60,76 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_and_drawer);
 
         // populateDB();
 
         mToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("");
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        final int PROGRAM_GROUP_ID = 0;
-        final int OTHER_GROUP_ID = 0;
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
-        Menu menu = navigationView.getMenu();
+        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        SubMenu parent1 = menu.addSubMenu("SubMenu1");
-        SubMenu parent2 = menu.addSubMenu("SubMenu2");
+        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
+        mDrawerMenu = mNavigationView.getMenu();
+        mProgramSubMenu = mDrawerMenu.addSubMenu(getString(R.string.drawer_title_programs));
 
-        parent1.add("Item1-1");
-        parent1.add("Item1-2");
-        parent1.add("Item1-3");
+        final DatabaseHandler db = new DatabaseHandler(this);
+        mPrograms = db.getAllPrograms();
 
-        parent2.add("Item2-1");
-        parent2.add("Item2-2");
+        if (!mPrograms.isEmpty()) {
+            for (int i = 0; i < mPrograms.size(); i++) {
+                mProgramSubMenu.add(PROGRAM_DRAWER_GROUP_ID, i, Menu.CATEGORY_SYSTEM, mPrograms.get(i).getName());
+            }
+        }
+        mDrawerMenu.add(OTHER_DRAWER_GROUP_ID, ID_ADD_ITEM_DRAWER, Menu.CATEGORY_SECONDARY, R.string.drawer_item_add).setIcon(R.drawable.ic_add_black);
+        mDrawerMenu.add(OTHER_DRAWER_GROUP_ID, ID_SETTINGS_ITEM_DRAWER, Menu.CATEGORY_SECONDARY, R.string.drawer_item_settings).setIcon(R.drawable.ic_settings_black_48dp);
+        drawerNotifyDataSetChanged();
 
-        for (int i = 0, count = navigationView.getChildCount(); i < count; i++) {
-            final View child = navigationView.getChildAt(i);
+        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case MainActivity.ID_ADD_ITEM_DRAWER:
+                        mDrawer.closeDrawers();
+                        Program newProgram = new Program(getString(R.string.new_program));
+                        long newProgramId = db.addProgram(newProgram);
+                        newProgram.setId(newProgramId);
+                        mPrograms.add(newProgram);
+                        mProgramSubMenu.add(PROGRAM_DRAWER_GROUP_ID, mPrograms.size() - 1, Menu.CATEGORY_SYSTEM, newProgram.getName());
+                        drawerNotifyDataSetChanged();
+                        updateProgramFragment(mPrograms.size() - 1);
+                        break;
+                    case MainActivity.ID_SETTINGS_ITEM_DRAWER:
+
+                        break;
+                    default:
+                        updateProgramFragment(menuItem.getItemId());
+                        break;
+                }
+                // If an item from extras group is clicked,refresh NAV_ITEMS_MAIN to remove previously checked item
+                /*if (menuItem.getGroupId() == PROGRAM_DRAWER_GROUP_ID) {
+                    mNavigationView.getMenu().setGroupCheckable(OTHER_DRAWER_GROUP_ID, false, true);
+                    mNavigationView.getMenu().setGroupCheckable(PROGRAM_DRAWER_GROUP_ID, true, true);
+                }else{
+                    mNavigationView.getMenu().setGroupCheckable(OTHER_DRAWER_GROUP_ID, true, true);
+                    mNavigationView.getMenu().setGroupCheckable(PROGRAM_DRAWER_GROUP_ID, false, true);
+                }*/
+                // Update highlighted item in the navigation menu
+                menuItem.setChecked(true);
+                mDrawer.closeDrawers();
+                return true;
+            }
+        });
+
+        updateProgramFragment(0);
+    }
+
+    public void drawerNotifyDataSetChanged(){
+        for (int i = 0, count = mNavigationView.getChildCount(); i < count; i++) {
+            final View child = mNavigationView.getChildAt(i);
             if (child != null && child instanceof ListView) {
                 final ListView menuView = (ListView) child;
                 final HeaderViewListAdapter adapter = (HeaderViewListAdapter) menuView.getAdapter();
@@ -89,144 +137,61 @@ public class MainActivity extends ActionBarActivity {
                 wrapped.notifyDataSetChanged();
             }
         }
-
-        // buildDrawer();
     }
 
-    public void buildDrawer() {
-        AccountHeader headerResult = new AccountHeaderBuilder()
-                .withActivity(this)
-                .withHeaderBackground(R.drawable.noprogram)
-                .withHeaderBackgroundScaleType(ImageView.ScaleType.CENTER_CROP)
-                .build();
-
-        mDrawer = new DrawerBuilder()
-                .withActivity(this)
-                .withToolbar(mToolbar)
-                .withAccountHeader(headerResult)
-                .withDisplayBelowToolbar(false)
-                        // .withFooter(R.id.footer)
-                .build();
-
-        final DatabaseHandler db = new DatabaseHandler(this);
-        mPrograms = db.getAllPrograms();
-        List<String> programsName = new ArrayList<String>();
+    public void deleteProgram(Program program) {
         int i = 0;
-        for (Program cn : mPrograms) {
-            programsName.add(cn.getName());
-            mDrawer.addItem(new PrimaryDrawerItem().withName(cn.getName()), i);
+        Program p = mPrograms.get(0);
+        while (p.getId() != program.getId()) {
+            p = mPrograms.get(i);
             i++;
         }
-        addLastItemsDrawer(mDrawer);
-
-        updateFragmentView(mPrograms);
-
-        mDrawer.setOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(AdapterView<?> parent, View view, int position, long id, IDrawerItem drawerItem) {
-                switch (drawerItem.getIdentifier()) {
-                    case ID_ADD_ITEM_DRAWER:
-                        mDrawer.closeDrawer();
-                        Program newProgram = new Program(getString(R.string.new_program));
-                        long newProgramId = db.addProgram(newProgram);
-                        newProgram.setId(newProgramId);
-                        mPrograms.add(newProgram);
-                        removeLastItemsDrawer(mDrawer);
-                        mDrawer.addItem(new PrimaryDrawerItem().withName(newProgram.getName()), mPrograms.size() - 1);
-                        addLastItemsDrawer(mDrawer);
-                        updateProgramFragment(mPrograms.size() - 1);
-                        break;
-                    case ID_SETTINGS_ITEM_DRAWER:
-                        // Intent intent = new Intent(this, SettingsActivity.class);
-                        break;
-                    default:
-                        updateProgramFragment(position);
-                        mDrawer.closeDrawer();
-                }
-                return true;
-            }
-        });
+        mProgramSubMenu.removeItem(i);
+        drawerNotifyDataSetChanged();
+        updateProgramFragment(0);
     }
 
-    public void removeLastItemsDrawer(Drawer drawer){
-        int drawerSize = drawer.getDrawerItems().size();
-        drawer.removeItem(drawerSize-1);
-        drawer.removeItem(drawerSize);
-        drawer.removeItem(drawerSize+1);
+    public void deleteExercise(Exercise exercise) {
+        mExercises.remove(exercise);
     }
 
-    public void addLastItemsDrawer(Drawer drawer){
-        drawer.addItem(new PrimaryDrawerItem()
-                        .withName(R.string.action_add)
-                        .withIcon(R.drawable.ic_add_black)
-                        .withIdentifier(ID_ADD_ITEM_DRAWER)
-        );
-
-        drawer.addItem(new DividerDrawerItem());
-
-        drawer.addItem(new PrimaryDrawerItem()
-                        .withName(R.string.action_settings)
-                        .withIcon(R.drawable.ic_settings_black_48dp)
-                        .withIdentifier(ID_SETTINGS_ITEM_DRAWER)
-        );
-    }
-
-    public void onProgramNameChanged(String newName) {
+    public void onProgramNameChanged(Program program, String newName) {
         mTitleView.setText(newName);
-        mDrawer.removeItem(mSelectedItemDrawerPosition);
-        mDrawer.addItem(new PrimaryDrawerItem().withName(newName), mSelectedItemDrawerPosition);
+        mProgramSubMenu.getItem(mSelectedItemDrawerPosition).setTitle(newName);
+        mProgram.setName(program.getName());
+        drawerNotifyDataSetChanged();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // mDrawer.resetDrawerContent();
-    }
-
-    public Drawer getmDrawer() {
-        return mDrawer;
-    }
-
-    public void updateFragmentView(ArrayList<Program> programs) {
-        if (!programs.isEmpty()) {
-            updateProgramFragment(0); // TO DO change hard code to updateProgramFragment(last user's choice)
-        } else {
-            mCurrent = null;
-            ///// TO DO inflate NoPrograms layout
-        }
     }
 
     public void updateProgramFragment(int position) {
-        DatabaseHandler db = new DatabaseHandler(this);
-        mCurrent = mPrograms.get(position);
-        mSelectedItemDrawerPosition = position;
-        mExercises = db.getAllExercisesProgram(mCurrent.getId());
-        buildProgramActivity();
+        if (!mPrograms.isEmpty()) {
+            DatabaseHandler db = new DatabaseHandler(this);
+            mProgram = mPrograms.get(position);
+            mSelectedItemDrawerPosition = position;
+            mExercises = db.getAllExercisesProgram(mProgram.getId());
+            buildProgramActivity();
+        } else { // All programs have been deleted
+            mProgram = null;
+            ///// TO DO
+        }
     }
 
     public void buildProgramActivity() {
-        FloatingActionButton buttonAddExercise = (FloatingActionButton) findViewById(R.id.button_add_exercise);
-        buttonAddExercise.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                NewExerciseNameDialogFragment dialogAddExercise = new NewExerciseNameDialogFragment();
-                Bundle arg = new Bundle();
-                arg.putLong(NewExerciseNameDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
-                dialogAddExercise.setArguments(arg);
-                dialogAddExercise.show(getSupportFragmentManager(), "TAG");
-            }
-        });
-        // ((CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar)).setTitle(mCurrent.getName());
+        final FloatingActionButton bottomFloatingButton = (FloatingActionButton) findViewById(R.id.bottom_floating_button);
+        // ((CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar)).setTitle(mProgram.getName());
         mTitleView = (TextView) findViewById(R.id.toolbar_title);
-        mTitleView.setText(mCurrent.getName());
-        mTitleView.setFocusableInTouchMode(true);
+        mTitleView.setText(mProgram.getName());
         mTitleView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle arg = new Bundle();
                 SetNameDialogFragment dialogSetName = new SetNameDialogFragment();
                 arg.putString(SetNameDialogFragment.ARG_DATA_TYPE, SetNameDialogFragment.ARG_TYPE_PROGRAM);
-                arg.putLong(SetNameDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
+                arg.putLong(SetNameDialogFragment.ARG_PROGRAM_ID, mProgram.getId());
                 dialogSetName.setArguments(arg);
                 dialogSetName.show(getSupportFragmentManager(), "TAG");
             }
@@ -234,28 +199,28 @@ public class MainActivity extends ActionBarActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
 
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        TabsAdapter tabsAdapter = new TabsAdapter(this, pager);
+        final ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        final TabsAdapter tabsAdapter = new TabsAdapter(this, pager);
         pager.setAdapter(tabsAdapter);
 
         FloatingActionButton runProgramButton = (FloatingActionButton) findViewById(R.id.button_run_program);
-        if(!mExercises.isEmpty()) {
+        if (!mExercises.isEmpty()) {
             runProgramButton.setEnabled(true);
             runProgramButton.setBackgroundTintList(getResources().getColorStateList(R.color.accent));
 
             Bundle argManageProgramFragment = new Bundle();
-            argManageProgramFragment.putLong(ManageProgramFragment.ARG_PROGRAM_ID, mCurrent.getId());
+            argManageProgramFragment.putLong(ManageProgramFragment.ARG_PROGRAM_ID, mProgram.getId());
             tabsAdapter.addTab(tabLayout.newTab(), ManageProgramFragment.class, argManageProgramFragment, getString(R.string.tab_title_exercises));
 
             Bundle argNoExercisesFragment = new Bundle();
-            argNoExercisesFragment.putLong(NoExercisesFragment.ARG_PROGRAM_ID, mCurrent.getId());
+            argNoExercisesFragment.putLong(NoExercisesFragment.ARG_PROGRAM_ID, mProgram.getId());
             tabsAdapter.addTab(tabLayout.newTab(), NoExercisesFragment.class, argNoExercisesFragment, getString(R.string.tab_title_stats));
-        }else{
+        } else {
             runProgramButton.setEnabled(false);
             runProgramButton.setBackgroundTintList(getResources().getColorStateList(R.color.divider));
 
             Bundle argNoExercisesFragment = new Bundle();
-            argNoExercisesFragment.putLong(NoExercisesFragment.ARG_PROGRAM_ID, mCurrent.getId());
+            argNoExercisesFragment.putLong(NoExercisesFragment.ARG_PROGRAM_ID, mProgram.getId());
             tabsAdapter.addTab(tabLayout.newTab(), NoExercisesFragment.class, argNoExercisesFragment, getString(R.string.tab_title_exercises));
             tabsAdapter.addTab(tabLayout.newTab(), NoExercisesFragment.class, argNoExercisesFragment, getString(R.string.tab_title_stats));
         }
@@ -264,7 +229,30 @@ public class MainActivity extends ActionBarActivity {
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                pager.setCurrentItem(tab.getPosition());
 
+                switch (tab.getPosition()){
+                    case POSITION_EXERCISE_TAB:
+                        bottomFloatingButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_add));
+                        bottomFloatingButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                DatabaseHandler db = new DatabaseHandler(MainActivity.this);
+                                Exercise newExercise = new Exercise(getString(R.string.new_exercise), "", mProgram.getId(), mExercises.size()+1, "simple", "");
+                                long newExerciseId = db.addExercise(newExercise);
+                                newExercise.setId(newExerciseId);
+                                mExercises.add(newExercise);
+                                ((ManageProgramFragment) tabsAdapter.getItem(POSITION_EXERCISE_TAB)).addExercise(newExercise);
+                                Intent intent = new Intent(MainActivity.this, ManageExerciseActivity.class);
+                                intent.putExtra(ManageExerciseActivity.ARG_EXERCISE_ID, newExerciseId);
+                                startActivity(intent);
+                            }
+                        });
+                        break;
+                    case POSITION_STATS_TAB:
+                        bottomFloatingButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_share));
+                        break;
+                }
             }
 
             @Override
@@ -282,8 +270,8 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
-        if (mDrawer != null && mDrawer.isDrawerOpen()) {
-            mDrawer.closeDrawer();
+        if (mDrawer != null && mDrawer.isDrawerOpen(GravityCompat.END)) {
+            mDrawer.closeDrawers();
         } else {
             super.onBackPressed();
         }
@@ -297,10 +285,11 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-
-        if (mCurrent != null) {
+        if (mProgram != null) {
             if (!mExercises.isEmpty()) {
                 inflater.inflate(R.menu.menu_manage_program, menu);
+            } else {
+                // inflater.inflate(R.menu.menu_manage_program_no_sort, menu);
             }
         }
         return super.onCreateOptionsMenu(menu);
@@ -310,7 +299,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
-
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -324,16 +312,19 @@ public class MainActivity extends ActionBarActivity {
             case R.id.action_delete:
                 DeleteDialogFragment dialogDelete = new DeleteDialogFragment();
                 arg.putString(DeleteDialogFragment.ARG_DATA_TYPE, DeleteDialogFragment.ARG_TYPE_PROGRAM);
-                arg.putLong(DeleteDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
+                arg.putLong(DeleteDialogFragment.ARG_PROGRAM_ID, mProgram.getId());
                 dialogDelete.setArguments(arg);
                 dialogDelete.show(getSupportFragmentManager(), "TAG");
                 return true;
             case R.id.action_set_name:
                 SetNameDialogFragment dialogSetName = new SetNameDialogFragment();
                 arg.putString(SetNameDialogFragment.ARG_DATA_TYPE, SetNameDialogFragment.ARG_TYPE_PROGRAM);
-                arg.putLong(SetNameDialogFragment.ARG_PROGRAM_ID, mCurrent.getId());
+                arg.putLong(SetNameDialogFragment.ARG_PROGRAM_ID, mProgram.getId());
                 dialogSetName.setArguments(arg);
                 dialogSetName.show(getSupportFragmentManager(), "TAG");
+                return true;
+            case android.R.id.home:
+                mDrawer.openDrawer(GravityCompat.START);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -344,16 +335,16 @@ public class MainActivity extends ActionBarActivity {
         DatabaseHandler db = new DatabaseHandler(this);
         db.deleteAllPrograms();
         long idRavi = db.addProgram(new Program("Half-body"));
-        long idPushups = db.addExercise(new Exercise("Barbell Rear Delt Row c'est la fête au camping", null, idRavi, 0, Exercise.MODE_SIMPLE, "While keeping the upper arms perpendicular to the torso, " +
+        long idPushups = db.addExercise(new Exercise("Barbell Rear Delt Row c'est la fête au camping", new String(), idRavi, 0, Exercise.MODE_SIMPLE, "While keeping the upper arms perpendicular to the torso, " +
                 "pull the barbell up towards your upper chest as you squeeze the " +
                 "rear delts and you breathe out"));
-        long idBarbell = db.addExercise(new Exercise("Barbell Bench Press", null, idRavi, 1, Exercise.MODE_SIMPLE, "From the starting position, breathe in and begin " +
+        long idBarbell = db.addExercise(new Exercise("Barbell Bench Press", new String(), idRavi, 1, Exercise.MODE_SIMPLE, "From the starting position, breathe in and begin " +
                 "coming down slowly until the bar touches your middle chest"));
-        long idFlyes = db.addExercise(new Exercise("Bodyweight Flyes", null, idRavi, 2, Exercise.MODE_SIMPLE, "Alternating your left and right arms, whipping " +
+        long idFlyes = db.addExercise(new Exercise("Bodyweight Flyes", new String(), idRavi, 2, Exercise.MODE_SIMPLE, "Alternating your left and right arms, whipping " +
                 "the ropes up and down as fast as you can"));
-        long idButterfly = db.addExercise(new Exercise("Butterfly", null, idRavi, 3, Exercise.MODE_SIMPLE, null));
-        long idPress = db.addExercise(new Exercise("Cable Chest Press ", null, idRavi, 4, Exercise.MODE_SIMPLE, null));
-        long idFlyPress = db.addExercise(new Exercise("Cable Fly Press ", null, idRavi, 5, Exercise.MODE_SIMPLE, null));
+        long idButterfly = db.addExercise(new Exercise("Butterfly", new String(), idRavi, 3, Exercise.MODE_SIMPLE, new String()));
+        long idPress = db.addExercise(new Exercise("Cable Chest Press ", new String(), idRavi, 4, Exercise.MODE_SIMPLE, new String()));
+        long idFlyPress = db.addExercise(new Exercise("Cable Fly Press ", new String(), idRavi, 5, Exercise.MODE_SIMPLE, new String()));
 
         db.addSet(new Set(13, 40, 1, 30, idPushups, 0));
         db.addSet(new Set(15, 40, 1, 30, idPushups, 1));

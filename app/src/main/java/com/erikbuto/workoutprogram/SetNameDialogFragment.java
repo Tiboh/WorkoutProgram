@@ -59,7 +59,7 @@ public class SetNameDialogFragment extends DialogFragment {
                         if(getArguments().getString(SetNameDialogFragment.ARG_DATA_TYPE) == ARG_TYPE_PROGRAM) {
                             mProgram.setName(fixed);
                             db.updateProgram(mProgram);
-                            ((MainActivity) getActivity()).onProgramNameChanged(fixed);
+                            ((MainActivity) getActivity()).onProgramNameChanged(mProgram, fixed);
                         } else {
                             mExercise.setName(fixed);
                             db.updateExercise(mExercise);

@@ -11,6 +11,8 @@ import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Program;
 import com.erikbuto.workoutprogram.DB.Set;
 import com.erikbuto.workoutprogram.Drawer.MainActivity;
+import com.erikbuto.workoutprogram.Home.ManageProgramFragment;
+import com.erikbuto.workoutprogram.Manage.ManageExerciseActivity;
 
 import java.util.ArrayList;
 
@@ -48,10 +50,13 @@ public class DeleteDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int id) {
                         if(getArguments().getString(DeleteDialogFragment.ARG_DATA_TYPE) == ARG_TYPE_PROGRAM) {
                             deleteProgram(mProgram, db);
+                            ((MainActivity) getActivity()).deleteProgram(mProgram);
+                            getActivity().onBackPressed();
                         } else {
                             deleteExercise(mExercise, db);
+                            // ((ManageExerciseActivity) getActivity()).deleteExercise(mExercise);
+                            getActivity().onBackPressed();
                         }
-                        ((MainActivity) getActivity()).updateFragmentView(db.getAllPrograms());
                     }
                 })
                 .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {

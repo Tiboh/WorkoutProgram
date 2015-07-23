@@ -25,12 +25,8 @@ dependencies {
     compile 'com.android.support:cardview-v7:22.1.1'
     compile 'com.android.support:recyclerview-v7:22.1.1'
     compile 'com.android.support:design:22.2.0'
-    compile('com.mikepenz:materialdrawer:3.0.8@aar') {
-        transitive = true
-    }
     compile 'com.pkmmte.view:circularimageview:1.1'
     compile 'com.android.support:gridlayout-v7:22.1.1'
     compile 'com.nhaarman.listviewanimations:lib-core:3.1.0@aar'
     compile 'com.nhaarman.listviewanimations:lib-manipulation:3.1.0@aar'
-    compile 'io.karim:materialtabs:2.0.2'
 }

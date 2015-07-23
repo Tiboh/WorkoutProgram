@@ -3,18 +3,26 @@
     tools:context=".MainActivity">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_subheader"
-            android:title="@string/title_activity_manage_program">
+            android:id="@+id/program_sub_menu"
+            android:title="@string/drawer_title_programs">
+            <menu>
+            </menu>
+        </item>
+    </group>
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/other_sub_menu"
+            android:title="@string/drawer_title_other">
             <menu>
                 <item
-                    android:id="@+id/navigation_item_1"
+                    android:id="@+id/drawer_item_add"
                     android:checked="true"
-                    android:icon="@drawable/ic_run"
-                    android:title="@string/edit_name" />
+                    android:icon="@drawable/ic_add_black"
+                    android:title="@string/drawer_item_add" />
                 <item
-                    android:id="@+id/navigation_item_2"
-                    android:icon="@drawable/ic_check"
-                    android:title="@string/action_example" />
+                    android:id="@+id/drawer_item_settings"
+                    android:icon="@drawable/ic_settings_black_48dp"
+                    android:title="@string/drawer_item_settings" />
             </menu>
         </item>
     </group>

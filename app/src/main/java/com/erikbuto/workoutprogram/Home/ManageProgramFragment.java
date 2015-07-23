@@ -46,9 +46,9 @@ public class ManageProgramFragment extends Fragment {
     private ArrayList<Exercise> mExercises;
 
     private RecyclerView mRecyclerView;
+    private CardViewAdapter mCardViewAdapter;
 
     public static final String ARG_PROGRAM_ID = "program_id";
-    public static final String TAB_TITLE = "Exercises";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,8 +62,18 @@ public class ManageProgramFragment extends Fragment {
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         // mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
-        mRecyclerView.setAdapter(new CardViewAdapter(mExercises));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+        mCardViewAdapter = new CardViewAdapter(mExercises);
+        mRecyclerView.setAdapter(mCardViewAdapter);
+        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Intent intent = new Intent(getActivity(), ManageExerciseActivity.class);
+                        intent.putExtra(ManageExerciseActivity.ARG_EXERCISE_ID, mExercises.get(position).getId());
+                        startActivity(intent);
+                    }
+                })
+        );
 
         return rootView;
     }
@@ -71,9 +81,12 @@ public class ManageProgramFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
     }
 
+    public void addExercise(Exercise exercise){
+        mExercises.add(exercise.getPosition(), exercise);
+        mCardViewAdapter.notifyDataSetChanged();
+    }
 
     private class CardDragListener implements View.OnDragListener {
         @Override

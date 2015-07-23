@@ -24,8 +24,14 @@ import java.util.Collections;
 public class SetListFragment extends Fragment {
 
     public static final String ARG_EXERCISE_ID = "exercise_id";
-    public static final String TAG_LIST_VIEW_FOOTER = "tag_list_view_footer";
-    public static final String TAG_LIST_VIEW_SET = "tag_list_view_set";
+
+    private DynamicListAdapter mAdapter;
+
+    // Default value for a new Set
+    public static final int NB_REP_DEFAULT = 10;
+    public static final int WEIGHT_DEFAULT = 50;
+    public static final int REST_MINUTE_DEFAULT = 1;
+    public static final int REST_SECONDS_DEFAULT = 30;
 
     private long mExerciseId;
 
@@ -47,16 +53,24 @@ public class SetListFragment extends Fragment {
         DynamicListView dynamicListView = (DynamicListView) rootView.findViewById(R.id.dynamic_list_view);
         dynamicListView.enableDragAndDrop();
         dynamicListView.setDraggableManager(new TouchViewDraggableManager(R.id.grip_view));
-        DynamicListAdapter adapter = new DynamicListAdapter(getActivity(), R.layout.fragment_set_list_item, sets);
-        dynamicListView.setAdapter(adapter);
-
-        View footerView = inflater.inflate(R.layout.add_footer_view, dynamicListView, false);
-        footerView.setTag(TAG_LIST_VIEW_FOOTER);
-        dynamicListView.addFooterView(footerView);
-        dynamicListView.setOnItemMovedListener(new DynamicListViewOnItemMovedListener(adapter));
-        dynamicListView.setOnItemClickListener(new DynamicListViewOnItemClickListener(dynamicListView, mExerciseId, adapter));
+        mAdapter = new DynamicListAdapter(getActivity(), R.layout.fragment_set_list_item, sets);
+        dynamicListView.setAdapter(mAdapter);
+        dynamicListView.setOnItemMovedListener(new DynamicListViewOnItemMovedListener(mAdapter));
+        dynamicListView.setOnItemClickListener(new DynamicListViewOnItemClickListener(dynamicListView, mExerciseId, mAdapter));
 
         return rootView;
+    }
+
+    public void addNewSet(){
+        int position = mAdapter.getItems().size()+1;
+        Set newSet;
+        if(position != 0){ // Adapter get already items in the list
+            Set previous = mAdapter.getItem(position-1);
+            newSet = new Set(previous.getNbRep(), previous.getWeight(), previous.getRestTimeMinute(), previous.getRestTimeSecond(), mExerciseId, position); // Get Set previous values
+        }else{
+            newSet = new Set(NB_REP_DEFAULT, WEIGHT_DEFAULT, REST_MINUTE_DEFAULT, REST_SECONDS_DEFAULT, mExerciseId, position);
+        }
+        mAdapter.add(newSet);
     }
 
     private class DynamicListViewOnItemMovedListener implements OnItemMovedListener {
@@ -103,25 +117,12 @@ public class SetListFragment extends Fragment {
 
         @Override
         public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-            if (view.getTag() == SetListFragment.TAG_LIST_VIEW_FOOTER) {
-                NewSetDialogFragment dialog = new NewSetDialogFragment();
-                Bundle arg = new Bundle();
-                arg.putLong(NewSetDialogFragment.ARG_EXERCISE_ID, mExerciseId);
-                arg.putInt(NewSetDialogFragment.ARG_POSITION, position);
-                if (position > 0) {
-                    arg.putLong(NewSetDialogFragment.ARG_PREVIOUS_SET_ID, ((Set) mAdapter.getItem(position - 1)).getId());
-                }
-                dialog.setArguments(arg);
-                dialog.setmAdapter(mAdapter);
-                dialog.show(getActivity().getSupportFragmentManager(), "TAG");
-            } else {
                 EditSetDialogFragment dialog = new EditSetDialogFragment();
                 Bundle arg = new Bundle();
                 arg.putLong(EditSetDialogFragment.ARG_SET_ID, ((Set) mAdapter.getItem(position)).getId());
                 dialog.setArguments(arg);
                 dialog.setmAdapter(mAdapter);
                 dialog.show(getActivity().getSupportFragmentManager(), "TAG");
-            }
         }
     }
 }

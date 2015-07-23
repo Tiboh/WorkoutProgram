@@ -8,7 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/no_exercises"
+        android:text="@string/no_sets"
         android:layout_gravity="center_horizontal"
         android:gravity="center" />
 
@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="@string/no_exercises_detailed"
+        android:text="@string/no_sets_detailed"
         android:layout_gravity="center_horizontal"
         android:gravity="center" />
 </LinearLayout>

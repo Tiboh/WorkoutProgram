@@ -8,7 +8,7 @@ import com.erikbuto.workoutprogram.DB.Set;
 public abstract class MyUtils {
 
     public static String stringifySet(Set set, String summaryDivider, String weightUnit, String labelRep){
-        String rep = Integer.toString(set.getNbRep()) + " " + labelRep;
+        String rep = Integer.toString(set.getNbRep()); // + " " + labelRep;
 
         if(set.getWeight() == 0){
             return rep;
