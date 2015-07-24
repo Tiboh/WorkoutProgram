@@ -2,6 +2,7 @@ package com.erikbuto.workoutprogram.Manage;
 
 import java.util.ArrayList;
 
+import android.content.Intent;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -114,6 +115,14 @@ public class ManageExerciseActivity extends ActionBarActivity {
                         break;
                     case POSITION_OVERVIEW_TAB:
                         mFloatingButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pen));
+                        mFloatingButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(ManageExerciseActivity.this, EditOverviewActivity.class);
+                                intent.putExtra(ImageFullScreenActivity.ARG_EXERCISE_ID, mExercise.getId());
+                                startActivity(intent);
+                            }
+                        });
                         break;
                     case POSITION_STATS_TAB:
                         mFloatingButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_share));

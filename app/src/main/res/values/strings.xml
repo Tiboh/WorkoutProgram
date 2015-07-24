@@ -41,6 +41,8 @@
     <string name="no_exercises_detailed">Please add exercises to become strong and stretched.</string>
     <string name="no_sets">This exercise is empty.</string>
     <string name="no_sets_detailed">Please add sets to become strong and stretched.</string>
+    <string name="no_overview">This exercise have no information.</string>
+    <string name="no_overview_detailed">Please modify it to add information.</string>
 
     <string name="message_delete">All the data will be deleted including stats</string>
 
@@ -69,8 +71,11 @@
 
     <string name="overview_description_header">Directions</string>
     <string name="overview_muscle_header">Muscles</string>
-    <string name="overview_muscle_primary_header">Muscles</string>
-    <string name="overview_muscle_secondary_header">Muscles</string>
+    <string name="overview_muscle_primary_header">Primary</string>
+    <string name="overview_muscle_secondary_header">Auxiliary</string>
+    <string name="title_activity_edit_overview">Edit exercise</string>
+
+    <string name="hello_world">Hello world!</string>
 
 
 </resources>

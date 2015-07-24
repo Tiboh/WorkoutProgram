@@ -39,8 +39,7 @@
             android:id="@+id/overview_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:maxLines="20">
+            android:layout_margin="5dp">
         </TextView>
 
     </LinearLayout>
