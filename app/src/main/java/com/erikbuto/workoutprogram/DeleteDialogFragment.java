@@ -54,7 +54,6 @@ public class DeleteDialogFragment extends DialogFragment {
                             getActivity().onBackPressed();
                         } else {
                             deleteExercise(mExercise, db);
-                            // ((ManageExerciseActivity) getActivity()).deleteExercise(mExercise);
                             getActivity().onBackPressed();
                         }
                     }

@@ -8,33 +8,24 @@ import java.util.Comparator;
  */
 public class Exercise implements Serializable {
 
-    public static final String MODE_SIMPLE = "simple";
-    public static final String MODE_ADVANCED = "advanced";
-
     private long id;
     private String name;
-    private String imageUrl;
     private long programId;
     private int position;
-    private String mode; // simple or advanced
     private String description;
 
-    public Exercise(String name, String imageUrl, long programId, int position, String mode, String description) {
+    public Exercise(String name, long programId, int position, String description) {
         this.name = name;
-        this.imageUrl = imageUrl;
         this.programId = programId;
         this.position = position;
-        this.mode = mode;
         this.description = description;
     }
 
-    public Exercise(long id, String name, String imageUrl, long programId, int position, String mode, String description) {
+    public Exercise(long id, String name, long programId, int position, String description) {
         this.id = id;
         this.name = name;
-        this.imageUrl = imageUrl;
         this.programId = programId;
         this.position = position;
-        this.mode = mode;
         this.description = description;
     }
 
@@ -47,14 +38,6 @@ public class Exercise implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
     }
 
     public long getProgramId() {
@@ -71,14 +54,6 @@ public class Exercise implements Serializable {
 
     public void setPosition(int position) {
         this.position = position;
-    }
-
-    public String getMode() {
-        return mode;
-    }
-
-    public void setMode(String mode) {
-        this.mode = mode;
     }
 
     public String getDescription() {

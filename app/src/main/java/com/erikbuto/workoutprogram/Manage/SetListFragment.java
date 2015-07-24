@@ -34,6 +34,7 @@ public class SetListFragment extends Fragment {
     public static final int REST_SECONDS_DEFAULT = 30;
 
     private long mExerciseId;
+    private ArrayList<Set> mSets;
 
     public SetListFragment() {
         // Empty constructor required for fragment subclasses
@@ -43,17 +44,15 @@ public class SetListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_set_list, container, false);
-
         mExerciseId = getArguments().getLong(SetListFragment.ARG_EXERCISE_ID);
 
         DatabaseHandler db = new DatabaseHandler(getActivity());
-        ArrayList<Set> sets = db.getAllSetsExercise(mExerciseId);
-        Collections.sort(sets, new Set.SetComparator());
-
+        mSets = db.getAllSetsExercise(mExerciseId);
+        Collections.sort(mSets, new Set.SetComparator());
         DynamicListView dynamicListView = (DynamicListView) rootView.findViewById(R.id.dynamic_list_view);
         dynamicListView.enableDragAndDrop();
         dynamicListView.setDraggableManager(new TouchViewDraggableManager(R.id.grip_view));
-        mAdapter = new DynamicListAdapter(getActivity(), R.layout.fragment_set_list_item, sets);
+        mAdapter = new DynamicListAdapter(getActivity(), R.layout.fragment_set_list_item, mSets, this);
         dynamicListView.setAdapter(mAdapter);
         dynamicListView.setOnItemMovedListener(new DynamicListViewOnItemMovedListener(mAdapter));
         dynamicListView.setOnItemClickListener(new DynamicListViewOnItemClickListener(dynamicListView, mExerciseId, mAdapter));
@@ -61,20 +60,29 @@ public class SetListFragment extends Fragment {
         return rootView;
     }
 
-    public void addNewSet(){
-        int position = mAdapter.getItems().size()+1;
+    public void removeSet(Set set) {
+        ((ManageExerciseActivity) getActivity()).removeSet(set);
+    }
+
+    public void addNewSet() {
+        DatabaseHandler db = new DatabaseHandler(getActivity());
+        if (mSets == null) {
+            mSets = db.getAllSetsExercise(mExerciseId);
+        }
+        int position = mSets.size();
         Set newSet;
-        if(position != 0){ // Adapter get already items in the list
-            Set previous = mAdapter.getItem(position-1);
+        if (position != 0) { // Adapter get already items in the list
+            Set previous = mSets.get(position - 1);
             newSet = new Set(previous.getNbRep(), previous.getWeight(), previous.getRestTimeMinute(), previous.getRestTimeSecond(), mExerciseId, position); // Get Set previous values
-        }else{
+        } else {
             newSet = new Set(NB_REP_DEFAULT, WEIGHT_DEFAULT, REST_MINUTE_DEFAULT, REST_SECONDS_DEFAULT, mExerciseId, position);
         }
+        db.addSet(newSet);
+        mSets.add(position, newSet);
         mAdapter.add(newSet);
     }
 
     private class DynamicListViewOnItemMovedListener implements OnItemMovedListener {
-
         private ArrayAdapter<Set> mAdapter;
 
         DynamicListViewOnItemMovedListener(ArrayAdapter<Set> adapter) {
@@ -117,12 +125,12 @@ public class SetListFragment extends Fragment {
 
         @Override
         public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-                EditSetDialogFragment dialog = new EditSetDialogFragment();
-                Bundle arg = new Bundle();
-                arg.putLong(EditSetDialogFragment.ARG_SET_ID, ((Set) mAdapter.getItem(position)).getId());
-                dialog.setArguments(arg);
-                dialog.setmAdapter(mAdapter);
-                dialog.show(getActivity().getSupportFragmentManager(), "TAG");
+            EditSetDialogFragment dialog = new EditSetDialogFragment();
+            Bundle arg = new Bundle();
+            arg.putLong(EditSetDialogFragment.ARG_SET_ID, ((Set) mAdapter.getItem(position)).getId());
+            dialog.setArguments(arg);
+            dialog.setmAdapter(mAdapter);
+            dialog.show(getActivity().getSupportFragmentManager(), "TAG");
         }
     }
 }

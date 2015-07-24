@@ -21,6 +21,10 @@ public class CardViewAdapter extends RecyclerView.Adapter<CardViewHolder> {
         this.list = list;
     }
 
+    public void replaceItems(ArrayList<Exercise> newItems){
+        this.list = newItems;
+    }
+
     @Override
     public CardViewHolder onCreateViewHolder(ViewGroup viewGroup, int itemType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.fragment_manage_program_item,viewGroup,false);

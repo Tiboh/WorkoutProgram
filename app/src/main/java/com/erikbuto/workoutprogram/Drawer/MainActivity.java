@@ -1,9 +1,14 @@
 package com.erikbuto.workoutprogram.Drawer;
 
+import java.net.URL;
 import java.util.ArrayList;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -12,6 +17,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,6 +30,8 @@ import android.widget.TextView;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
+import com.erikbuto.workoutprogram.DB.Image;
+import com.erikbuto.workoutprogram.DB.Muscle;
 import com.erikbuto.workoutprogram.DB.Program;
 import com.erikbuto.workoutprogram.DB.Set;
 import com.erikbuto.workoutprogram.DeleteDialogFragment;
@@ -33,6 +41,7 @@ import com.erikbuto.workoutprogram.Home.NoExercisesFragment;
 import com.erikbuto.workoutprogram.Home.TabsAdapter;
 import com.erikbuto.workoutprogram.Manage.ManageExerciseActivity;
 import com.erikbuto.workoutprogram.Manage.SetListFragment;
+import com.erikbuto.workoutprogram.MyUtils;
 import com.erikbuto.workoutprogram.SetNameDialogFragment;
 import com.erikbuto.workoutprogram.R;
 
@@ -53,6 +62,8 @@ public class MainActivity extends ActionBarActivity {
 
     public static final int POSITION_EXERCISE_TAB = 0;
     public static final int POSITION_STATS_TAB = 1;
+
+    public static final String ACTIVITY_RESULT = "activity_result";
 
     private Toolbar mToolbar;
     private TextView mTitleView;
@@ -151,10 +162,6 @@ public class MainActivity extends ActionBarActivity {
         updateProgramFragment(0);
     }
 
-    public void deleteExercise(Exercise exercise) {
-        mExercises.remove(exercise);
-    }
-
     public void onProgramNameChanged(Program program, String newName) {
         mTitleView.setText(newName);
         mProgramSubMenu.getItem(mSelectedItemDrawerPosition).setTitle(newName);
@@ -182,6 +189,12 @@ public class MainActivity extends ActionBarActivity {
 
     public void buildProgramActivity() {
         final FloatingActionButton bottomFloatingButton = (FloatingActionButton) findViewById(R.id.bottom_floating_button);
+        bottomFloatingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addNewExercise();
+            }
+        });
         // ((CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar)).setTitle(mProgram.getName());
         mTitleView = (TextView) findViewById(R.id.toolbar_title);
         mTitleView.setText(mProgram.getName());
@@ -224,28 +237,19 @@ public class MainActivity extends ActionBarActivity {
             tabsAdapter.addTab(tabLayout.newTab(), NoExercisesFragment.class, argNoExercisesFragment, getString(R.string.tab_title_exercises));
             tabsAdapter.addTab(tabLayout.newTab(), NoExercisesFragment.class, argNoExercisesFragment, getString(R.string.tab_title_stats));
         }
-
         tabLayout.setTabsFromPagerAdapter(tabsAdapter);
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 pager.setCurrentItem(tab.getPosition());
 
-                switch (tab.getPosition()){
+                switch (tab.getPosition()) {
                     case POSITION_EXERCISE_TAB:
                         bottomFloatingButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_add));
                         bottomFloatingButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                DatabaseHandler db = new DatabaseHandler(MainActivity.this);
-                                Exercise newExercise = new Exercise(getString(R.string.new_exercise), "", mProgram.getId(), mExercises.size()+1, "simple", "");
-                                long newExerciseId = db.addExercise(newExercise);
-                                newExercise.setId(newExerciseId);
-                                mExercises.add(newExercise);
-                                ((ManageProgramFragment) tabsAdapter.getItem(POSITION_EXERCISE_TAB)).addExercise(newExercise);
-                                Intent intent = new Intent(MainActivity.this, ManageExerciseActivity.class);
-                                intent.putExtra(ManageExerciseActivity.ARG_EXERCISE_ID, newExerciseId);
-                                startActivity(intent);
+                                addNewExercise();
                             }
                         });
                         break;
@@ -266,6 +270,17 @@ public class MainActivity extends ActionBarActivity {
             }
         });
         pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+    }
+
+    public void addNewExercise(){
+        DatabaseHandler db = new DatabaseHandler(MainActivity.this);
+        Exercise newExercise = new Exercise(getString(R.string.new_exercise), mProgram.getId(), mExercises.size() + 1, "");
+        long newExerciseId = db.addExercise(newExercise);
+        newExercise.setId(newExerciseId);
+        mExercises.add(newExercise);
+        Intent intent = new Intent(MainActivity.this, ManageExerciseActivity.class);
+        intent.putExtra(ManageExerciseActivity.ARG_EXERCISE_ID, newExerciseId);
+        startActivity(intent);
     }
 
     @Override
@@ -335,16 +350,49 @@ public class MainActivity extends ActionBarActivity {
         DatabaseHandler db = new DatabaseHandler(this);
         db.deleteAllPrograms();
         long idRavi = db.addProgram(new Program("Half-body"));
-        long idPushups = db.addExercise(new Exercise("Barbell Rear Delt Row c'est la fête au camping", new String(), idRavi, 0, Exercise.MODE_SIMPLE, "While keeping the upper arms perpendicular to the torso, " +
+        long idPushups = db.addExercise(new Exercise("Barbell Rear Delt Row c'est la fête au camping", idRavi, 0, "While keeping the upper arms perpendicular to the torso, " +
                 "pull the barbell up towards your upper chest as you squeeze the " +
                 "rear delts and you breathe out"));
-        long idBarbell = db.addExercise(new Exercise("Barbell Bench Press", new String(), idRavi, 1, Exercise.MODE_SIMPLE, "From the starting position, breathe in and begin " +
+        long idBarbell = db.addExercise(new Exercise("Barbell Bench Press", idRavi, 1, "From the starting position, breathe in and begin " +
                 "coming down slowly until the bar touches your middle chest"));
-        long idFlyes = db.addExercise(new Exercise("Bodyweight Flyes", new String(), idRavi, 2, Exercise.MODE_SIMPLE, "Alternating your left and right arms, whipping " +
+        long idFlyes = db.addExercise(new Exercise("Bodyweight Flyes", idRavi, 2, "Alternating your left and right arms, whipping " +
                 "the ropes up and down as fast as you can"));
-        long idButterfly = db.addExercise(new Exercise("Butterfly", new String(), idRavi, 3, Exercise.MODE_SIMPLE, new String()));
-        long idPress = db.addExercise(new Exercise("Cable Chest Press ", new String(), idRavi, 4, Exercise.MODE_SIMPLE, new String()));
-        long idFlyPress = db.addExercise(new Exercise("Cable Fly Press ", new String(), idRavi, 5, Exercise.MODE_SIMPLE, new String()));
+        long idButterfly = db.addExercise(new Exercise("Butterfly", idRavi, 3, new String()));
+        long idPress = db.addExercise(new Exercise("Cable Chest Press ", idRavi, 4, new String()));
+        long idFlyPress = db.addExercise(new Exercise("Cable Fly Press ", idRavi, 5, new String()));
+
+        try {
+            ////---- ONLY FOR TESTING -----//// TO DELETE
+            if( Build.VERSION.SDK_INT >= 9){
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                StrictMode.setThreadPolicy(policy);
+            }
+            ////----------------------------------------////
+            ArrayList<URL> urls = new ArrayList<>();
+            urls.add(new URL("http://www.amazingbodynow.com/wp-content/uploads/2012/08/exercise.jpg"));
+            urls.add(new URL("http://www.sweatlikeapig.com/wp-content/uploads/2012/12/Bird-Dog-exercise.jpg"));
+            urls.add(new URL("http://www.myynow.org/wp-content/uploads/2010/04/stab.-ball.jpg"));
+            urls.add(new URL("http://www.ibodz.com/files/exerciseimages/bench-press-on-fitball--1.jpg"));
+            for(int i = 0 ; i < urls.size(); i++) {
+                Bitmap bmp = BitmapFactory.decodeStream(urls.get(i).openConnection().getInputStream());
+                String url = MyUtils.IMAGE_FOLDER_URL+System.currentTimeMillis();
+                MyUtils.saveImageToInternalStorage(bmp, url, this);
+                db.addImage(new Image(url, 0, idPushups));
+            }
+        }catch (java.net.MalformedURLException e){
+            Log.e("Download and add image", e.getMessage());
+        }catch(java.io.IOException e){
+            Log.e("Download and add image", e.getMessage());
+        }
+
+        db.addMuscle(new Muscle("Ischio", Muscle.MUSCLE_TYPE_PRIMARY, idPushups));
+        db.addMuscle(new Muscle("Quadriceps", Muscle.MUSCLE_TYPE_PRIMARY, idPushups));
+        db.addMuscle(new Muscle("Trapez", Muscle.MUSCLE_TYPE_SECONDARY, idPushups));
+        db.addMuscle(new Muscle("Biceps", Muscle.MUSCLE_TYPE_SECONDARY, idPushups));
+        db.addMuscle(new Muscle("Tricpes", Muscle.MUSCLE_TYPE_SECONDARY, idPushups));
+
+        db.addMuscle(new Muscle("Ischio", Muscle.MUSCLE_TYPE_PRIMARY, idBarbell));
+        db.addMuscle(new Muscle("Quadriceps", Muscle.MUSCLE_TYPE_PRIMARY, idBarbell));
 
         db.addSet(new Set(13, 40, 1, 30, idPushups, 0));
         db.addSet(new Set(15, 40, 1, 30, idPushups, 1));

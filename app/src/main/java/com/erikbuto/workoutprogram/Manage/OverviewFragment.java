@@ -6,11 +6,19 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.daimajia.slider.library.SliderLayout;
+import com.daimajia.slider.library.SliderTypes.BaseSliderView;
+import com.daimajia.slider.library.SliderTypes.DefaultSliderView;
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
+import com.erikbuto.workoutprogram.DB.Image;
+import com.erikbuto.workoutprogram.DB.Muscle;
 import com.erikbuto.workoutprogram.DB.Set;
+import com.erikbuto.workoutprogram.MyUtils;
 import com.erikbuto.workoutprogram.R;
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
 import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.TouchViewDraggableManager;
@@ -23,8 +31,13 @@ import java.util.Collections;
  */
 public class OverviewFragment extends Fragment {
 
+    private SliderLayout mSliderShow;
+
     public static final String ARG_EXERCISE_ID = "exercise_id";
     private Exercise mExercise;
+    private ArrayList<Image> mImages;
+    private ArrayList<Muscle> mPrimaryMuscles;
+    private ArrayList<Muscle> mSecondaryMuscles;
 
     public OverviewFragment() {
         // Empty constructor required for fragment subclasses
@@ -37,29 +50,76 @@ public class OverviewFragment extends Fragment {
 
         DatabaseHandler db = new DatabaseHandler(getActivity());
         mExercise = db.getExercise(getArguments().getLong(OverviewFragment.ARG_EXERCISE_ID));
+        mImages = db.getAllImagesExercise(mExercise.getId());
+        mPrimaryMuscles = db.getAllPrimaryMuscleExercise(mExercise.getId());
+        mSecondaryMuscles = db.getAllSecondaryMuscleExercise(mExercise.getId());
 
-        if(!mExercise.getImageUrl().isEmpty()){
-            LayoutInflater vi = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View v = vi.inflate(R.layout.overview_image_view, null);
+        if(!mImages.isEmpty()){
+            FrameLayout rootLayout = (FrameLayout) rootView.findViewById(R.id.overview_frame_image);
+            View v = rootView.inflate(getActivity(), R.layout.overview_image_view, rootLayout);
 
-            // Insert into main view
-            ViewGroup insertPoint = (ViewGroup) rootView.findViewById(R.id.overview_content);
-            insertPoint.addView(v, 0, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+            mSliderShow = (SliderLayout) v.findViewById(R.id.image_slider);
+
+            for(int i = 0 ; i < mImages.size() ; i++) {
+                DefaultSliderView sliderView = new DefaultSliderView(getActivity());
+                sliderView.image(MyUtils.getFileFromInternalStorage(mImages.get(i).getUrl(), getActivity()));
+                sliderView.setScaleType(BaseSliderView.ScaleType.CenterCrop);
+                mSliderShow.addSlider(sliderView);
+            }
         }
 
         if (!mExercise.getDescription().isEmpty()) {
-            LayoutInflater vi = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View v = vi.inflate(R.layout.overview_description_view, null);
+            FrameLayout rootLayout = (FrameLayout) rootView.findViewById(R.id.overview_frame_description);
+            View v = rootView.inflate(getActivity(), R.layout.overview_description_view, rootLayout);
 
             // Fill in any details dynamically here
             TextView textDescription = (TextView) v.findViewById(R.id.overview_description);
             textDescription.setText(mExercise.getDescription());
+        }
 
-            // Insert into main view
-            ViewGroup insertPoint = (ViewGroup) rootView.findViewById(R.id.overview_content);
-            insertPoint.addView(v, 0, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+        if(!mPrimaryMuscles.isEmpty() || !mSecondaryMuscles.isEmpty()){
+            FrameLayout rootLayout = (FrameLayout) rootView.findViewById(R.id.overview_frame_muscle);
+            View v = rootView.inflate(getActivity(), R.layout.overview_muscle_view, rootLayout);
+
+            if(!mPrimaryMuscles.isEmpty()){
+                FrameLayout framePrimary = (FrameLayout) v.findViewById(R.id.muscle_primary_frame);
+                View primaryView = v.inflate(getActivity(), R.layout.overview_muscle_view_item, framePrimary);
+
+                String concatString = new String();
+                for(int i = 0 ; i < mPrimaryMuscles.size() ; i++){
+                    concatString = concatString.concat(mPrimaryMuscles.get(i).getName() + " ");
+                }
+
+                TextView musclesHeader = (TextView) primaryView.findViewById(R.id.overview_muscle_item_header);
+                musclesHeader.setText(Muscle.MUSCLE_TYPE_PRIMARY);
+
+                TextView musclesContent = (TextView) primaryView.findViewById(R.id.overview_muscle_item_content);
+                musclesContent.setText(concatString);
+            }
+
+            if(!mSecondaryMuscles.isEmpty()){
+                FrameLayout frameSecondary = (FrameLayout) v.findViewById(R.id.muscle_secondary_frame);
+                View secondaryView = v.inflate(getActivity(), R.layout.overview_muscle_view_item, frameSecondary);
+
+                String concatString = new String();
+                for(int i = 0 ; i < mSecondaryMuscles.size() ; i++){
+                    concatString = concatString.concat(mSecondaryMuscles.get(i).getName() + " ");
+                }
+
+                TextView musclesHeader = (TextView) secondaryView.findViewById(R.id.overview_muscle_item_header);
+                musclesHeader.setText(Muscle.MUSCLE_TYPE_SECONDARY);
+
+                TextView musclesContent = (TextView) secondaryView.findViewById(R.id.overview_muscle_item_content);
+                musclesContent.setText(concatString);
+            }
         }
 
         return rootView;
+    }
+
+    @Override
+    public void onStop() {
+        mSliderShow.stopAutoCycle();
+        super.onStop();
     }
 }

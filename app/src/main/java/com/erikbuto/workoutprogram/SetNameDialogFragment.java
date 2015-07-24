@@ -16,6 +16,7 @@ import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Program;
 import com.erikbuto.workoutprogram.Drawer.MainActivity;
+import com.erikbuto.workoutprogram.Manage.ManageExerciseActivity;
 
 /**
  * Created by Utilisateur on 14/07/2015.
@@ -63,7 +64,7 @@ public class SetNameDialogFragment extends DialogFragment {
                         } else {
                             mExercise.setName(fixed);
                             db.updateExercise(mExercise);
-                            getActivity().setTitle(fixed);
+                            ((ManageExerciseActivity) getActivity()).onExerciseNameChanged(mExercise, fixed);
                         }
 
                         SetNameDialogFragment.this.getDialog().dismiss();

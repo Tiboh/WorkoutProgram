@@ -81,10 +81,9 @@ public class ManageProgramFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-    }
-
-    public void addExercise(Exercise exercise){
-        mExercises.add(exercise.getPosition(), exercise);
+        DatabaseHandler db = new DatabaseHandler(getActivity());
+        mExercises = db.getAllExercisesProgram(mProgramId);
+        mCardViewAdapter.replaceItems(mExercises);
         mCardViewAdapter.notifyDataSetChanged();
     }
 

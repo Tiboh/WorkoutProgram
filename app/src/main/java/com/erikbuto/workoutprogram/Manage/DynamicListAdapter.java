@@ -1,6 +1,7 @@
 package com.erikbuto.workoutprogram.Manage;
 
 import android.content.Context;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,12 +9,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
+import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Set;
 import com.erikbuto.workoutprogram.MyUtils;
 import com.erikbuto.workoutprogram.R;
 import com.nhaarman.listviewanimations.ArrayAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by Utilisateur on 17/07/2015.
@@ -21,14 +24,16 @@ import java.util.ArrayList;
 public class DynamicListAdapter extends ArrayAdapter<Set> {
 
     private final Context mContext;
+    private SetListFragment mParentFragment;
 
     private ArrayList<Set> mItems;
     private int mResourceLayoutId;
 
 
-    public DynamicListAdapter(final Context context, int resourceLayoutId, ArrayList<Set> items) {
+    public DynamicListAdapter(final Context context, int resourceLayoutId, ArrayList<Set> items, SetListFragment parentFragment) {
         mContext = context;
         mItems = items;
+        mParentFragment = parentFragment;
         mResourceLayoutId = resourceLayoutId;
         for (int i = 0; i < items.size(); i++) {
             add(mItems.get(i));
@@ -37,9 +42,8 @@ public class DynamicListAdapter extends ArrayAdapter<Set> {
 
     public void setItem(int position, Set item) {
         mItems.add(position, item);
-        mItems.remove(position+1);
+        mItems.remove(position + 1);
     }
-
 
     @Override
     public long getItemId(final int position) {
@@ -64,11 +68,11 @@ public class DynamicListAdapter extends ArrayAdapter<Set> {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final DatabaseHandler db = new DatabaseHandler(mContext);
+                DatabaseHandler db = new DatabaseHandler(mContext);
                 Set set = mItems.get(position);
                 db.deleteSet(set);
-                mItems.remove(set);
                 DynamicListAdapter.this.remove(position);
+                mParentFragment.removeSet(set);
             }
         });
 

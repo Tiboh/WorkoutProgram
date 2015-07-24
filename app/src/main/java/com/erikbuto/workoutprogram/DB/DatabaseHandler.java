@@ -27,6 +27,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String TABLE_EXERCISE = "exercise";
     private static final String TABLE_SET = "sett";
 
+    private static final String TABLE_MUSCLE = "muscle";
+    private static final String TABLE_IMAGE = "image";
+
     // Program table columns names
     private static final String PROGRAM_ID = "id";
     private static final String PROGRAM_NAME = "name";
@@ -34,9 +37,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Exercise table columns names
     private static final String EXERCISE_ID = "id";
     private static final String EXERCISE_NAME = "name";
-    private static final String EXERCISE_IMAGE_URL = "image_url";
     private static final String EXERCISE_PROGRAM_ID = "program_id";
-    private static final String EXERCISE_MODE = "mode";
     private static final String EXERCISE_POSITION = "position";
     private static final String EXERCISE_DESCRIPTION = "description";
 
@@ -48,6 +49,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String SET_REST_SECONDS = "rest_seconds";
     private static final String SET_EXERCISE_ID = "exercise_id";
     private static final String SET_POSITION = "position";
+
+    // Muscle table columns names
+    private static final String MUSCLE_ID = "id";
+    private static final String MUSCLE_NAME = "name";
+    private static final String MUSCLE_TYPE = "type";
+    private static final String MUSCLE_EXERCISE_ID = "exercise_id";
+
+    // Muscle table columns names
+    private static final String IMAGE_ID = "id";
+    private static final String IMAGE_URL = "url";
+    private static final String IMAGE_POSITION = "position";
+    private static final String IMAGE_EXERCISE_ID = "exercise_id";
+
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -64,10 +78,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String CREATE_EXERCISE_TABLE = "CREATE TABLE " + TABLE_EXERCISE + "("
                 + EXERCISE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + EXERCISE_NAME + " TEXT NOT NULL,"
-                + EXERCISE_IMAGE_URL + " TEXT,"
                 + EXERCISE_PROGRAM_ID + " INTEGER NOT NULL,"
                 + EXERCISE_POSITION + " INTEGER NOT NULL,"
-                + EXERCISE_MODE + " TEXT NOT NULL DEFAULT 'simple' CHECK(mode in ('simple','advanced')),"
                 + EXERCISE_DESCRIPTION + " TEXT,"
                 + "FOREIGN KEY (" + EXERCISE_PROGRAM_ID + ") REFERENCES " + TABLE_PROGRAM + "(" + PROGRAM_ID + ")" + ")";
         db.execSQL(CREATE_EXERCISE_TABLE);
@@ -82,6 +94,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + SET_POSITION + " INTEGER NOT NULL,"
                 + "FOREIGN KEY (" + SET_EXERCISE_ID + ") REFERENCES " + TABLE_EXERCISE + "(" + EXERCISE_ID + ")" + ")";
         db.execSQL(CREATE_SET_TABLE);
+
+        String CREATE_MUSCLE_TABLE = "CREATE TABLE " + TABLE_MUSCLE + "("
+                + MUSCLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + MUSCLE_NAME + " TEXT NOT NULL,"
+                + MUSCLE_TYPE + " TEXT NOT NULL DEFAULT '" + Muscle.MUSCLE_TYPE_PRIMARY + "' CHECK("+ MUSCLE_TYPE +" in ('"+ Muscle.MUSCLE_TYPE_PRIMARY + "','" + Muscle.MUSCLE_TYPE_SECONDARY + "')),"
+                + MUSCLE_EXERCISE_ID + " INTEGER NOT NULL,"
+                + "FOREIGN KEY (" + MUSCLE_EXERCISE_ID + ") REFERENCES " + TABLE_EXERCISE + "(" + EXERCISE_ID + ")" + ")";
+        db.execSQL(CREATE_MUSCLE_TABLE);
+
+        String CREATE_IMAGE_TABLE = "CREATE TABLE " + TABLE_IMAGE + "("
+                + IMAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + IMAGE_URL + " TEXT NOT NULL,"
+                + IMAGE_POSITION + " INTEGER NOT NULL,"
+                + IMAGE_EXERCISE_ID + " INTEGER NOT NULL,"
+                + "FOREIGN KEY (" + IMAGE_EXERCISE_ID + ") REFERENCES " + TABLE_EXERCISE + "(" + EXERCISE_ID + ")" + ")";
+        db.execSQL(CREATE_IMAGE_TABLE);
     }
 
     // Upgrading database
@@ -91,6 +119,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROGRAM);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXERCISE);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_SET);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MUSCLE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_IMAGE);
 
         // Create tables again
         onCreate(db);
@@ -119,9 +149,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(EXERCISE_NAME, exercise.getName());
-        values.put(EXERCISE_IMAGE_URL, exercise.getImageUrl());
         values.put(EXERCISE_PROGRAM_ID, exercise.getProgramId());
-        values.put(EXERCISE_MODE, exercise.getMode());
         values.put(EXERCISE_POSITION, exercise.getPosition());
         values.put(EXERCISE_DESCRIPTION, exercise.getDescription());
 
@@ -148,6 +176,34 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return id;
     }
 
+    public long addImage(Image image) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(IMAGE_URL, image.getUrl());
+        values.put(IMAGE_POSITION, image.getPosition());
+        values.put(IMAGE_EXERCISE_ID, image.getExerciseId());
+
+        // Inserting Row
+        long id = db.insert(TABLE_IMAGE, null, values);
+        db.close(); // Closing database connection
+        return id;
+    }
+
+    public long addMuscle(Muscle muscle) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(MUSCLE_NAME, muscle.getName());
+        values.put(MUSCLE_TYPE, muscle.getType());
+        values.put(MUSCLE_EXERCISE_ID, muscle.getExerciseId());
+
+        // Inserting Row
+        long id = db.insert(TABLE_MUSCLE, null, values);
+        db.close(); // Closing database connection
+        return id;
+    }
+
     // Getting single
     public Program getProgram(long id) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -167,14 +223,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_EXERCISE, new String[]{EXERCISE_ID,
-                        EXERCISE_NAME, EXERCISE_IMAGE_URL, EXERCISE_PROGRAM_ID, EXERCISE_POSITION, EXERCISE_MODE, EXERCISE_DESCRIPTION}, EXERCISE_ID + "=?",
+                        EXERCISE_NAME, EXERCISE_PROGRAM_ID, EXERCISE_POSITION, EXERCISE_DESCRIPTION}, EXERCISE_ID + "=?",
                 new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
 
         Exercise exercise = new Exercise(Long.parseLong(cursor.getString(0)),
-                cursor.getString(1), cursor.getString(2), Long.parseLong(cursor.getString(3)),
-                Integer.parseInt(cursor.getString(4)), cursor.getString(5), cursor.getString(6));
+                cursor.getString(1), Long.parseLong(cursor.getString(2)),
+                Integer.parseInt(cursor.getString(3)), cursor.getString(4));
         return exercise;
     }
 
@@ -193,6 +249,34 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return set;
     }
 
+    public Image getImage(long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_IMAGE, new String[]{IMAGE_ID,
+                        IMAGE_URL, IMAGE_POSITION, IMAGE_EXERCISE_ID}, IMAGE_ID + "=?",
+                new String[]{String.valueOf(id)}, null, null, null, null);
+        if (cursor != null)
+            cursor.moveToFirst();
+
+        Image image = new Image(Long.parseLong(cursor.getString(0)),
+                cursor.getString(1), Integer.parseInt(cursor.getString(2)), Long.parseLong(cursor.getString(3)));
+        return image;
+    }
+
+    public Muscle getMuscle(long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_MUSCLE, new String[]{MUSCLE_ID,
+                        MUSCLE_NAME, MUSCLE_TYPE, MUSCLE_EXERCISE_ID}, MUSCLE_ID + "=?",
+                new String[]{String.valueOf(id)}, null, null, null, null);
+        if (cursor != null)
+            cursor.moveToFirst();
+
+        Muscle muscle = new Muscle(Long.parseLong(cursor.getString(0)),
+                cursor.getString(1), cursor.getString(2), Long.parseLong(cursor.getString(3)));
+        return muscle;
+    }
+
     // Getting All
     public ArrayList<Program> getAllPrograms() {
         ArrayList<Program> programList = new ArrayList<Program>();
@@ -206,7 +290,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Program program = new Program();
-                program.setId(Integer.parseInt(cursor.getString(0)));
+                program.setId(Long.parseLong(cursor.getString(0)));
                 program.setName(cursor.getString(1));
                 // Adding contact to list
                 programList.add(program);
@@ -229,13 +313,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Exercise exercise = new Exercise();
-                exercise.setId(Integer.parseInt(cursor.getString(0)));
+                exercise.setId(Long.parseLong(cursor.getString(0)));
                 exercise.setName(cursor.getString(1));
-                exercise.setImageUrl(cursor.getString(2));
-                exercise.setProgramId(Long.parseLong(cursor.getString(3)));
-                exercise.setPosition(Integer.parseInt(cursor.getString(4)));
-                exercise.setMode(cursor.getString(5));
-                exercise.setDescription(cursor.getString(6));
+                exercise.setProgramId(Long.parseLong(cursor.getString(2)));
+                exercise.setPosition(Integer.parseInt(cursor.getString(3)));
+                exercise.setDescription(cursor.getString(4));
                 // Adding contact to list
                 exerciseList.add(exercise);
             } while (cursor.moveToNext());
@@ -257,7 +339,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Set set = new Set();
-                set.setId(Integer.parseInt(cursor.getString(0)));
+                set.setId(Long.parseLong(cursor.getString(0)));
                 set.setNbRep(Integer.parseInt(cursor.getString(1)));
                 set.setWeight(Integer.parseInt(cursor.getString(2)));
                 set.setRestTimeMinute(Integer.parseInt(cursor.getString(3)));
@@ -285,13 +367,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Exercise exercise = new Exercise();
-                exercise.setId(Integer.parseInt(cursor.getString(0)));
+                exercise.setId(Long.parseLong(cursor.getString(0)));
                 exercise.setName(cursor.getString(1));
-                exercise.setImageUrl(cursor.getString(2));
-                exercise.setProgramId(Long.parseLong(cursor.getString(3)));
-                exercise.setPosition(Integer.parseInt(cursor.getString(4)));
-                exercise.setMode(cursor.getString(5));
-                exercise.setDescription(cursor.getString(6));
+                exercise.setProgramId(Long.parseLong(cursor.getString(2)));
+                exercise.setPosition(Integer.parseInt(cursor.getString(3)));
+                exercise.setDescription(cursor.getString(4));
                 // Adding contact to list
                 exerciseList.add(exercise);
             } while (cursor.moveToNext());
@@ -313,7 +393,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Set set = new Set();
-                set.setId(Integer.parseInt(cursor.getString(0)));
+                set.setId(Long.parseLong(cursor.getString(0)));
                 set.setNbRep(Integer.parseInt(cursor.getString(1)));
                 set.setWeight(Integer.parseInt(cursor.getString(2)));
                 set.setRestTimeMinute(Integer.parseInt(cursor.getString(3)));
@@ -327,6 +407,106 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // return contact list
         return setList;
+    }
+
+    public ArrayList<Image> getAllImagesExercise(long exerciseId) {
+        ArrayList<Image> imageList = new ArrayList<Image>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_IMAGE + " WHERE " + IMAGE_EXERCISE_ID + "=" + exerciseId;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Image image = new Image();
+                image.setId(Long.parseLong(cursor.getString(0)));
+                image.setUrl(cursor.getString(1));
+                image.setPosition(Integer.parseInt(cursor.getString(2)));
+                image.setExerciseId(Long.parseLong(cursor.getString(3)));
+                // Adding contact to list
+                imageList.add(image);
+            } while (cursor.moveToNext());
+        }
+
+        // return contact list
+        return imageList;
+    }
+
+    public ArrayList<Muscle> getAllMuscleExercise(long exerciseId) {
+        ArrayList<Muscle> muscleList = new ArrayList<Muscle>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_MUSCLE + " WHERE " + MUSCLE_EXERCISE_ID + "=" + exerciseId;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Muscle muscle = new Muscle();
+                muscle.setId(Long.parseLong(cursor.getString(0)));
+                muscle.setName(cursor.getString(1));
+                muscle.setType(cursor.getString(2));
+                muscle.setExerciseId(Long.parseLong(cursor.getString(3)));
+                // Adding contact to list
+                muscleList.add(muscle);
+            } while (cursor.moveToNext());
+        }
+
+        // return contact list
+        return muscleList;
+    }
+
+    public ArrayList<Muscle> getAllPrimaryMuscleExercise(long exerciseId) {
+        ArrayList<Muscle> muscleList = new ArrayList<Muscle>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_MUSCLE + " WHERE " + MUSCLE_EXERCISE_ID + "=" + exerciseId + " AND " + MUSCLE_TYPE + "='" + Muscle.MUSCLE_TYPE_PRIMARY+"'";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Muscle muscle = new Muscle();
+                muscle.setId(Long.parseLong(cursor.getString(0)));
+                muscle.setName(cursor.getString(1));
+                muscle.setType(cursor.getString(2));
+                muscle.setExerciseId(Long.parseLong(cursor.getString(3)));
+                // Adding contact to list
+                muscleList.add(muscle);
+            } while (cursor.moveToNext());
+        }
+
+        // return contact list
+        return muscleList;
+    }
+
+    public ArrayList<Muscle> getAllSecondaryMuscleExercise(long exerciseId) {
+        ArrayList<Muscle> muscleList = new ArrayList<Muscle>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_MUSCLE + " WHERE " + MUSCLE_EXERCISE_ID + "=" + exerciseId + " AND " + MUSCLE_TYPE + "='" + Muscle.MUSCLE_TYPE_SECONDARY+"'";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Muscle muscle = new Muscle();
+                muscle.setId(Long.parseLong(cursor.getString(0)));
+                muscle.setName(cursor.getString(1));
+                muscle.setType(cursor.getString(2));
+                muscle.setExerciseId(Long.parseLong(cursor.getString(3)));
+                // Adding contact to list
+                muscleList.add(muscle);
+            } while (cursor.moveToNext());
+        }
+
+        // return contact list
+        return muscleList;
     }
 
     // Getting Count
@@ -391,9 +571,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(EXERCISE_NAME, exercise.getName());
-        values.put(EXERCISE_IMAGE_URL, exercise.getImageUrl());
         values.put(EXERCISE_PROGRAM_ID, exercise.getProgramId());
-        values.put(EXERCISE_MODE, exercise.getMode());
         values.put(EXERCISE_POSITION, exercise.getPosition());
         values.put(EXERCISE_DESCRIPTION, exercise.getDescription());
 
@@ -418,6 +596,32 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(set.getId())});
     }
 
+    public int updateImage(Image image) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(IMAGE_URL, image.getUrl());
+        values.put(IMAGE_POSITION, image.getPosition());
+        values.put(IMAGE_EXERCISE_ID, image.getExerciseId());
+
+        // updating row
+        return db.update(TABLE_IMAGE, values, IMAGE_ID + " = ?",
+                new String[]{String.valueOf(image.getId())});
+    }
+
+    public int updateMuscle(Muscle muscle) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(MUSCLE_NAME, muscle.getName());
+        values.put(MUSCLE_TYPE, muscle.getType());
+        values.put(MUSCLE_EXERCISE_ID, muscle.getExerciseId());
+
+        // updating row
+        return db.update(TABLE_MUSCLE, values, MUSCLE_ID + " = ?",
+                new String[]{String.valueOf(muscle.getId())});
+    }
+
     // Deleting single
     public void deleteProgram(Program program) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -437,6 +641,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_SET, SET_ID + " = ?",
                 new String[]{String.valueOf(set.getId())});
+        db.close();
+    }
+
+    public void deleteMuscle(Muscle muscle) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_MUSCLE, MUSCLE_ID + " = ?",
+                new String[]{String.valueOf(muscle.getId())});
+        db.close();
+    }
+
+    public void deleteImage(Image image) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_IMAGE, IMAGE_ID + " = ?",
+                new String[]{String.valueOf(image.getId())});
         db.close();
     }
 

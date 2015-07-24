@@ -19,5 +19,5 @@
             android:name=".Manage.ManageExerciseActivity"
             android:label="@string/title_activity_manage_exercise" />
     </application>
-
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
