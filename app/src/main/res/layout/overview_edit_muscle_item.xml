@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/edit_muscle_name_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_toLeftOf="@+id/edit_muscle_delete_item"
+        android:layout_toStartOf="@+id/edit_muscle_delete_item"
+        android:singleLine="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/edit_muscle_delete_item"
+        android:src="@drawable/ic_cross"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true" />
+
+</RelativeLayout>

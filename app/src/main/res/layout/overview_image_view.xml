@@ -14,7 +14,9 @@
         <com.daimajia.slider.library.SliderLayout
             android:id="@+id/image_slider"
             android:layout_width="match_parent"
-            android:layout_height="200dp" />
+            android:layout_height="200dp"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"/>
 
     </LinearLayout>
 
