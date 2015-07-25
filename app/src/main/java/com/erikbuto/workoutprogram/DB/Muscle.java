@@ -1,9 +1,11 @@
 package com.erikbuto.workoutprogram.DB;
 
+import java.io.Serializable;
+
 /**
  * Created by Utilisateur on 24/07/2015.
  */
-public class Muscle {
+public class Muscle implements Serializable{
 
     public static final String MUSCLE_TYPE_PRIMARY = "primary";
     public static final String MUSCLE_TYPE_SECONDARY = "secondary";
@@ -27,6 +29,21 @@ public class Muscle {
     }
 
     public Muscle() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean sameSame = false;
+        if (o != null && o instanceof Muscle)
+        {
+            sameSame = this.name.toLowerCase() == ((Muscle) o).name.toLowerCase();
+        }
+        return sameSame;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     public long getId() {
@@ -59,5 +76,10 @@ public class Muscle {
 
     public void setExerciseId(long exerciseId) {
         this.exerciseId = exerciseId;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

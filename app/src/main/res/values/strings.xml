@@ -75,8 +75,26 @@
     <string name="overview_muscle_primary_header">Primary</string>
     <string name="overview_muscle_secondary_header">Auxiliary</string>
     <string name="title_activity_edit_overview">Edit exercise</string>
+    <string name="new_muscle">New muscle</string>
 
-    <string name="hello_world">Hello world!</string>
-
+    <string-array name="muscles_list">
+        <item>Abdominals</item>
+        <item>Arms</item>
+        <item>Middle Back</item>
+        <item>Lower Back</item>
+        <item>Biceps</item>
+        <item>Calves</item>
+        <item>Chest</item>
+        <item>Forearms</item>
+        <item>Glutes</item>
+        <item>Hamstrings</item>
+        <item>Lats</item>
+        <item>Legs</item>
+        <item>Neck</item>
+        <item>Quadriceps</item>
+        <item>Shoulders</item>
+        <item>Traps</item>
+        <item>Triceps</item>
+    </string-array>
 
 </resources>

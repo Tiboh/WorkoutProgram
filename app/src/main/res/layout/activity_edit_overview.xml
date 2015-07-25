@@ -49,19 +49,19 @@
                             android:id="@+id/grid_layout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:columnCount="3"/>
+                            app:columnCount="3" />
 
                         <TextView
                             android:id="@+id/add_image_edit_overview"
+                            style="@style/Base.TextAppearance.AppCompat.Button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_margin="7dp"
-                            android:text="@string/action_add_images"
-                            style="@style/Base.TextAppearance.AppCompat.Button"
-                            android:textColor="@color/primary_dark"
                             android:layout_gravity="bottom|right"
+                            android:layout_margin="7dp"
                             android:clickable="true"
-                            android:foreground="?android:attr/selectableItemBackground" />
+                            android:foreground="?android:attr/selectableItemBackground"
+                            android:text="@string/action_add_images"
+                            android:textColor="@color/primary_dark" />
 
                     </LinearLayout>
 
@@ -89,11 +89,6 @@
                             android:text="@string/overview_muscle_header"
                             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="@color/divider" />
-
                         <TextView
                             android:id="@+id/edit_primary_muscle_header"
                             android:layout_width="wrap_content"
@@ -102,16 +97,16 @@
                             android:textAppearance="?android:attr/textAppearanceSmall"
                             android:textStyle="bold" />
 
-                        <com.erikbuto.workoutprogram.LinearListView
-                            android:id="@+id/edit_primary_muscle_content"
+                        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"/>
+                            android:layout_height="match_parent">
 
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="@color/divider" />
+                            <com.erikbuto.workoutprogram.Manage.MuscleCompletionView
+                                android:id="@+id/edit_primary_muscle_content"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+
+                        </RelativeLayout>
 
                         <TextView
                             android:id="@+id/edit_secondary_muscle_header"
@@ -121,11 +116,10 @@
                             android:textAppearance="?android:attr/textAppearanceSmall"
                             android:textStyle="bold" />
 
-                        <com.erikbuto.workoutprogram.LinearListView
+                        <com.erikbuto.workoutprogram.Manage.MuscleCompletionView
                             android:id="@+id/edit_secondary_muscle_content"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"/>
+                            android:layout_height="wrap_content" />
 
                     </LinearLayout>
                 </android.support.v7.widget.CardView>

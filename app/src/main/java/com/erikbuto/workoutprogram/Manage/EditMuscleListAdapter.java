@@ -50,13 +50,13 @@ public class EditMuscleListAdapter extends ArrayAdapter<Muscle> {
 
         if(position == mItems.size()-1){
             muscleEditText.setText("");
-            deleteView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_check_black));
+            deleteView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_add_black));
             deleteView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mItems.get(position).setName(muscleEditText.getText().toString());
                     mItems.add(position + 1, new Muscle("", mType, mExerciseId));
-                    deleteView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_cross));
+                    deleteView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_delete));
                     deleteView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {

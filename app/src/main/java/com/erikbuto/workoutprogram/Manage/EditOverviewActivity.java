@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ScrollView;
@@ -28,6 +29,7 @@ import com.erikbuto.workoutprogram.MyUtils;
 import com.erikbuto.workoutprogram.R;
 import com.erikbuto.workoutprogram.SquareImageView;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -106,16 +108,41 @@ public class EditOverviewActivity extends ActionBarActivity {
             mGrid.setOnDragListener(new CardDragListener());
         }
 
-        // Add two empty items
-        // They will be displayed as EditText to add a new Muscle
-        mPrimaryMuscles.add(new Muscle("", Muscle.MUSCLE_TYPE_PRIMARY, mExercise.getId()));
-        mSecondaryMuscles.add(new Muscle("", Muscle.MUSCLE_TYPE_SECONDARY, mExercise.getId()));
+        ArrayList<Muscle> allMuscles = db.getAllMuscles();
+        String[] muscles = getResources().getStringArray(R.array.muscles_list);
+        for(int i = 0 ; i < muscles.length ; i++){
+            Muscle newMuscle = new Muscle(muscles[i], "", 0);
+            if(!allMuscles.contains(newMuscle)) {
+                allMuscles.add(newMuscle);
+            }
+        }
 
-        LinearListView primaryListView = (LinearListView) findViewById(R.id.edit_primary_muscle_content);
+        ArrayAdapter<Muscle> adapterPrimary = new ArrayAdapter<Muscle>(this, android.R.layout.simple_list_item_1, allMuscles);
+        MuscleCompletionView completionViewPrimary = (MuscleCompletionView) findViewById(R.id.edit_primary_muscle_content);
+        completionViewPrimary.setmExerciseId(mExercise.getId());
+        completionViewPrimary.setmType(Muscle.MUSCLE_TYPE_PRIMARY);
+        completionViewPrimary.setAdapter(adapterPrimary);
+        for(int i = 0 ; i < mPrimaryMuscles.size() ; i++){
+            completionViewPrimary.addObject(mPrimaryMuscles.get(i));
+        }
+
+        ArrayAdapter<Muscle> adapterSecondary = new ArrayAdapter<Muscle>(this, android.R.layout.simple_list_item_1, allMuscles);
+        MuscleCompletionView completionViewSecondary = (MuscleCompletionView) findViewById(R.id.edit_secondary_muscle_content);
+        completionViewSecondary.setmExerciseId(mExercise.getId());
+        completionViewSecondary.setmType(Muscle.MUSCLE_TYPE_SECONDARY);
+        completionViewSecondary.setAdapter(adapterSecondary);
+        for(int i = 0 ; i < mSecondaryMuscles.size() ; i++){
+            completionViewSecondary.addObject(mSecondaryMuscles.get(i));
+        }
+
+        completionViewPrimary.allowDuplicates(false);
+        completionViewSecondary.allowDuplicates(false);
+
+        /*LinearListView primaryListView = (LinearListView) findViewById(R.id.edit_primary_muscle_content);
         LinearListView secondaryListView = (LinearListView) findViewById(R.id.edit_secondary_muscle_content);
 
         primaryListView.setAdapter(new EditMuscleListAdapter(this, R.layout.overview_edit_muscle_item, mPrimaryMuscles, Muscle.MUSCLE_TYPE_PRIMARY, mExercise.getId()));
-        secondaryListView.setAdapter(new EditMuscleListAdapter(this, R.layout.overview_edit_muscle_item, mSecondaryMuscles, Muscle.MUSCLE_TYPE_SECONDARY, mExercise.getId()));
+        secondaryListView.setAdapter(new EditMuscleListAdapter(this, R.layout.overview_edit_muscle_item, mSecondaryMuscles, Muscle.MUSCLE_TYPE_SECONDARY, mExercise.getId()));*/
 
     }
 

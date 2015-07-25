@@ -355,6 +355,31 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return setList;
     }
 
+    public ArrayList<Muscle> getAllMuscles() {
+        ArrayList<Muscle> muscleList = new ArrayList<Muscle>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_MUSCLE;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Muscle muscle = new Muscle();
+                muscle.setId(Long.parseLong(cursor.getString(0)));
+                muscle.setName(cursor.getString(1));
+                muscle.setType(cursor.getString(2));
+                muscle.setExerciseId(Long.parseLong(cursor.getString(3)));
+                // Adding contact to list
+                muscleList.add(muscle);
+            } while (cursor.moveToNext());
+        }
+
+        // return contact list
+        return muscleList;
+    }
+
     public ArrayList<Exercise> getAllExercisesProgram(long programId) {
         ArrayList<Exercise> exerciseList = new ArrayList<Exercise>();
         // Select All Query
