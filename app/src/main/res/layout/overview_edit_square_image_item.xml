@@ -10,7 +10,7 @@
     android:padding="16dp"
     grid:layout_columnWeight="1">
 
-    <com.erikbuto.workoutprogram.SquareImageView
+    <com.erikbuto.workoutprogram.Utils.SquareImageView
         android:id="@+id/overview_edit_image_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

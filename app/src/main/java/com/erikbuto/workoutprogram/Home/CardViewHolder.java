@@ -1,5 +1,6 @@
 package com.erikbuto.workoutprogram.Home;
 
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
@@ -23,8 +24,18 @@ public class CardViewHolder extends RecyclerView.ViewHolder {
         mImageView = (ImageView) itemView.findViewById(R.id.exercise_image);
     }
 
-    public void bind(Exercise myObject) {
+    public void bind(Exercise myObject, Bitmap firstImage, String scaleType) {
         mNameView.setText(myObject.getName());
-        // Picasso.with(imageView.getContext()).load(myObject.getImageUrl()).centerCrop().fit().into(imageView);
+        if(firstImage != null) {
+            mImageView.setImageBitmap(firstImage);
+        }
+        switch(scaleType){
+            case CardViewAdapter.CENTER_CROP:
+                mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                break;
+            case CardViewAdapter.CENTER_INSIDE:
+                mImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                break;
+        }
     }
 }

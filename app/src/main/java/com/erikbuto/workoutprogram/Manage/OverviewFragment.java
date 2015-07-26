@@ -2,13 +2,16 @@ package com.erikbuto.workoutprogram.Manage;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.daimajia.slider.library.SliderLayout;
@@ -18,14 +21,12 @@ import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Image;
 import com.erikbuto.workoutprogram.DB.Muscle;
-import com.erikbuto.workoutprogram.DB.Set;
-import com.erikbuto.workoutprogram.MyUtils;
+import com.erikbuto.workoutprogram.Utils.MyUtils;
 import com.erikbuto.workoutprogram.R;
-import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
-import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.TouchViewDraggableManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Utilisateur on 23/07/2015.
@@ -105,7 +106,7 @@ public class OverviewFragment extends Fragment implements BaseSliderView.OnSlide
                     musclesHeader.setText(getString(R.string.overview_muscle_primary_header));
 
                     TextView musclesContent = (TextView) primaryView.findViewById(R.id.overview_muscle_item_content);
-                    musclesContent.setText(concatString);
+                    chipsifyMyTextView(musclesContent, concatString);
                 }
 
                 if (!mSecondaryMuscles.isEmpty()) {
@@ -121,12 +122,33 @@ public class OverviewFragment extends Fragment implements BaseSliderView.OnSlide
                     musclesHeader.setText(getString(R.string.overview_muscle_secondary_header));
 
                     TextView musclesContent = (TextView) secondaryView.findViewById(R.id.overview_muscle_item_content);
-                    musclesContent.setText(concatString);
+                    chipsifyMyTextView(musclesContent, concatString);
                 }
             }
         }
 
         return rootView;
+    }
+
+    public void chipsifyMyTextView(TextView myTextView, String myText){
+        String regex = "\\w+";
+        Pattern p = Pattern.compile(regex);
+        Matcher matcher = p.matcher(myText);
+        SpannableStringBuilder sb = new SpannableStringBuilder(myText);
+        while (matcher.find()) {
+            final LayoutInflater layoutInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final View parent =  (View) layoutInflater.inflate(R.layout.muscle_token, null);
+            final TextView oneWord =  (TextView) parent.findViewById(R.id.muscle_name);
+            final int begin = matcher.start();
+            final int end = matcher.end();
+            float pixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15, getResources().getDisplayMetrics());
+            oneWord.setTextSize(pixels);
+            oneWord.setText(myText.substring(begin, end).toString());
+            BitmapDrawable bd = new BitmapDrawable(MyUtils.convertViewToDrawable(oneWord));
+            bd.setBounds(0, 0, bd.getIntrinsicWidth(),bd.getIntrinsicHeight());
+            sb.setSpan(new ImageSpan(bd), begin, end, 0); // Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        }
+        myTextView.setText(sb);
     }
 
     @Override

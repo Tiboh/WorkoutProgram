@@ -1,27 +1,19 @@
 package com.erikbuto.workoutprogram.Manage;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 
 import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.DefaultSliderView;
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Image;
-import com.erikbuto.workoutprogram.DeleteDialogFragment;
-import com.erikbuto.workoutprogram.MyUtils;
+import com.erikbuto.workoutprogram.Utils.MyUtils;
 import com.erikbuto.workoutprogram.R;
-import com.erikbuto.workoutprogram.SetNameDialogFragment;
 
 import java.util.ArrayList;
 

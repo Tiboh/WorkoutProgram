@@ -31,21 +31,6 @@ public class Muscle implements Serializable{
     public Muscle() {
     }
 
-    @Override
-    public boolean equals(Object o) {
-        boolean sameSame = false;
-        if (o != null && o instanceof Muscle)
-        {
-            sameSame = this.name.toLowerCase() == ((Muscle) o).name.toLowerCase();
-        }
-        return sameSame;
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
     public long getId() {
         return id;
     }

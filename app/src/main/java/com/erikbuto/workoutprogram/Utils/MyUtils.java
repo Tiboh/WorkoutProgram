@@ -1,9 +1,12 @@
-package com.erikbuto.workoutprogram;
+package com.erikbuto.workoutprogram.Utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
+import android.view.View;
 
 import com.erikbuto.workoutprogram.DB.Set;
 
@@ -90,5 +93,21 @@ public abstract class MyUtils {
     public static File getFileFromInternalStorage(String url, Context context) {
         File filePath = context.getFileStreamPath(url);
         return filePath;
+    }
+
+    public static Bitmap convertViewToDrawable(View view) {
+        int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        view.measure(spec, spec);
+        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        Bitmap b = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        c.translate(-view.getScrollX(), -view.getScrollY());
+        view.draw(c);
+        view.setDrawingCacheEnabled(true);
+        Bitmap cacheBmp = view.getDrawingCache();
+        Bitmap viewBmp = cacheBmp.copy(Bitmap.Config.ARGB_8888, true);
+        view.destroyDrawingCache();
+        return viewBmp;
     }
 }

@@ -1,4 +1,4 @@
-package com.erikbuto.workoutprogram;
+package com.erikbuto.workoutprogram.Utils;
 
 import android.content.Context;
 import android.util.AttributeSet;

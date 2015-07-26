@@ -1,4 +1,5 @@
 <resources>
+
     <style name="AppTheme.Toolbar" parent="AppThemeNoActionBar">
         <!-- Customize color of navigation drawer icon and back arrow -->
         <item name="colorControlNormal">@color/icons</item>
@@ -8,8 +9,13 @@
         <!-- Set title color -->
         <item name="android:textColor">@color/icons</item>
     </style>
+
     <style name="AppTheme.Toolbar.Subtitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
         <!-- Set title color -->
         <item name="android:textColor">@color/icons</item>
+    </style>
+
+    <style name="textview_chips" parent="@android:style/TextAppearance.Medium">
+        <item name="android:background">@drawable/muscle_token_background</item>
     </style>
 </resources>

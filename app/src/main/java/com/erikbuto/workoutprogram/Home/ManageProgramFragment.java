@@ -63,7 +63,7 @@ public class ManageProgramFragment extends Fragment {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         // mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
-        mCardViewAdapter = new CardViewAdapter(mExercises);
+        mCardViewAdapter = new CardViewAdapter(mExercises, getActivity());
         mRecyclerView.setAdapter(mCardViewAdapter);
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
                     @Override

@@ -700,4 +700,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL("DELETE FROM " + TABLE_SET);
         db.close();
     }
+
+    public void deleteAllImages(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM " + TABLE_IMAGE);
+        db.close();
+    }
+
+    public void deleteAllMuscles(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM " + TABLE_MUSCLE);
+        db.close();
+    }
 }

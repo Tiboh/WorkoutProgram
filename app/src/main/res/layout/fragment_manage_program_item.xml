@@ -32,8 +32,7 @@
             android:padding="10dp"
             android:text="Pushups"
             android:fontFamily="sans-serif"
-            android:textSize="18sp"
-            android:textColor="#f44336" />
+            android:textSize="18sp"/>
 
 
     </LinearLayout>

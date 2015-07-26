@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.erikbuto.workoutprogram.Utils.TextViewThinFont xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/big_letter"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:capitalize="characters"
+    android:text="A"
+    android:textColor="@color/primary"
+    android:textSize="100sp"
+    android:gravity="center" />

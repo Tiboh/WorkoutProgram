@@ -8,6 +8,6 @@
         android:background="@drawable/muscle_token_background"
         android:padding="5dp"
         android:textColor="@color/icons"
-        android:textSize="18sp" />
+        android:textSize="15sp" />
 
 </LinearLayout>

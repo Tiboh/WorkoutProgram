@@ -4,32 +4,45 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.ClipData;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.net.Uri;
+import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayout;
 import android.support.v7.widget.Toolbar;
+import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Image;
 import com.erikbuto.workoutprogram.DB.Muscle;
-import com.erikbuto.workoutprogram.LinearListView;
-import com.erikbuto.workoutprogram.MyUtils;
+import com.erikbuto.workoutprogram.Utils.MyUtils;
 import com.erikbuto.workoutprogram.R;
-import com.erikbuto.workoutprogram.SquareImageView;
+import com.erikbuto.workoutprogram.Utils.SquareImageView;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
-import java.lang.reflect.Array;
+import org.w3c.dom.Text;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,6 +54,7 @@ public class EditOverviewActivity extends ActionBarActivity {
 
     private Exercise mExercise;
     private ArrayList<Image> mImages;
+    private final int SELECT_PHOTO = 0;
     private ArrayList<Muscle> mPrimaryMuscles;
     private ArrayList<Muscle> mSecondaryMuscles;
 
@@ -75,18 +89,26 @@ public class EditOverviewActivity extends ActionBarActivity {
         EditText mDescriptionView = (EditText) findViewById(R.id.edit_overview_description);
         mDescriptionView.setText(mExercise.getDescription());
 
+
+        TextView addImageTextView = (TextView) findViewById(R.id.add_image_edit_overview);
+        addImageTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(Build.VERSION.SDK_INT >= 16) {
+                    startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT).putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true).setType("image/*"), SELECT_PHOTO);
+                }else{
+                    startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT).putExtra(Intent.ACTION_PICK, true).setType("image/*"), SELECT_PHOTO);
+                }
+            }
+        });
+
         if (!mImages.isEmpty()) {
             mGrid = (GridLayout) findViewById(R.id.grid_layout);
             mScrollView = (ScrollView) findViewById(R.id.scroll_view);
             mScrollView.setSmoothScrollingEnabled(true);
 
-            final LayoutInflater inflater = LayoutInflater.from(this);
             for (int i = 0; i < mImages.size(); i++) {
-                final View itemView = inflater.inflate(R.layout.overview_edit_square_image_item, mGrid, false);
-                final SquareImageView imageView = (SquareImageView) itemView.findViewById(R.id.overview_edit_image_item);
-                imageView.setImageBitmap(MyUtils.getImageFromInternalStorage(mImages.get(i).getUrl(), this));
-                itemView.setOnLongClickListener(new LongPressListener());
-                mGrid.addView(itemView);
+                addImageToGridView(mImages.get(i).getUrl());
             }
 
             // Purely aesthetic
@@ -104,17 +126,14 @@ public class EditOverviewActivity extends ActionBarActivity {
                     mGrid.setColumnCount(3);
                     break;
             }
-
             mGrid.setOnDragListener(new CardDragListener());
+            registerForContextMenu(mGrid);
         }
 
-        ArrayList<Muscle> allMuscles = db.getAllMuscles();
         String[] muscles = getResources().getStringArray(R.array.muscles_list);
-        for(int i = 0 ; i < muscles.length ; i++){
-            Muscle newMuscle = new Muscle(muscles[i], "", 0);
-            if(!allMuscles.contains(newMuscle)) {
-                allMuscles.add(newMuscle);
-            }
+        ArrayList<Muscle> allMuscles = new ArrayList<>();
+        for (int i = 0; i < muscles.length; i++) {
+            allMuscles.add(new Muscle(muscles[i], "", 0));
         }
 
         ArrayAdapter<Muscle> adapterPrimary = new ArrayAdapter<Muscle>(this, android.R.layout.simple_list_item_1, allMuscles);
@@ -122,7 +141,7 @@ public class EditOverviewActivity extends ActionBarActivity {
         completionViewPrimary.setmExerciseId(mExercise.getId());
         completionViewPrimary.setmType(Muscle.MUSCLE_TYPE_PRIMARY);
         completionViewPrimary.setAdapter(adapterPrimary);
-        for(int i = 0 ; i < mPrimaryMuscles.size() ; i++){
+        for (int i = 0; i < mPrimaryMuscles.size(); i++) {
             completionViewPrimary.addObject(mPrimaryMuscles.get(i));
         }
 
@@ -131,19 +150,14 @@ public class EditOverviewActivity extends ActionBarActivity {
         completionViewSecondary.setmExerciseId(mExercise.getId());
         completionViewSecondary.setmType(Muscle.MUSCLE_TYPE_SECONDARY);
         completionViewSecondary.setAdapter(adapterSecondary);
-        for(int i = 0 ; i < mSecondaryMuscles.size() ; i++){
+        for (int i = 0; i < mSecondaryMuscles.size(); i++) {
             completionViewSecondary.addObject(mSecondaryMuscles.get(i));
         }
-
+        char[] splitChar = {',', ';', ' '};
         completionViewPrimary.allowDuplicates(false);
+        completionViewPrimary.setSplitChar(splitChar);
         completionViewSecondary.allowDuplicates(false);
-
-        /*LinearListView primaryListView = (LinearListView) findViewById(R.id.edit_primary_muscle_content);
-        LinearListView secondaryListView = (LinearListView) findViewById(R.id.edit_secondary_muscle_content);
-
-        primaryListView.setAdapter(new EditMuscleListAdapter(this, R.layout.overview_edit_muscle_item, mPrimaryMuscles, Muscle.MUSCLE_TYPE_PRIMARY, mExercise.getId()));
-        secondaryListView.setAdapter(new EditMuscleListAdapter(this, R.layout.overview_edit_muscle_item, mSecondaryMuscles, Muscle.MUSCLE_TYPE_SECONDARY, mExercise.getId()));*/
-
+        completionViewSecondary.setSplitChar(splitChar);
     }
 
     private class CardDragListener implements View.OnDragListener {
@@ -207,6 +221,13 @@ public class EditOverviewActivity extends ActionBarActivity {
             mIndexStart = calculateNewIndex(view.getX(), view.getY());
 
             return true;
+        }
+    }
+
+    private class ShortPressListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+
         }
     }
 
@@ -288,5 +309,86 @@ public class EditOverviewActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.overview_edit_image_menu, menu);
+    }
+
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.delete_image:
+                mGrid.removeViewAt(info.position);
+                mGrid.notify();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+
+        switch (requestCode) {
+            case SELECT_PHOTO:
+                if (resultCode == RESULT_OK) {
+
+                    if(Build.VERSION.SDK_INT >= 16) {
+                        ClipData clipData = imageReturnedIntent.getClipData();
+                        for (int i = 0; i < clipData.getItemCount(); i++) {
+                            Uri selectedImage = clipData.getItemAt(i).getUri();
+                            InputStream imageStream = null;
+                            try {
+                                imageStream = getContentResolver().openInputStream(selectedImage);
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            Bitmap yourSelectedImage = BitmapFactory.decodeStream(imageStream);
+                            String url = addNewImageToDB(yourSelectedImage);
+                            addImageToGridView(url);
+                        }
+                    }else{
+                        Uri selectedImage = imageReturnedIntent.getData();
+                        InputStream imageStream = null;
+                        try {
+                            imageStream = getContentResolver().openInputStream(selectedImage);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        Bitmap yourSelectedImage = BitmapFactory.decodeStream(imageStream);
+                        String url = addNewImageToDB(yourSelectedImage);
+                        addImageToGridView(url);
+                    }
+                }
+                break;
+        }
+    }
+
+    public void addImageToGridView(String url){
+        final LayoutInflater inflater = LayoutInflater.from(this);
+        final View itemView = inflater.inflate(R.layout.overview_edit_square_image_item, mGrid, false);
+        final SquareImageView imageView = (SquareImageView) itemView.findViewById(R.id.overview_edit_image_item);
+        ImageLoader imageLoader = ImageLoader.getInstance();
+        DisplayImageOptions options = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.abc_spinner_mtrl_am_alpha) // resource or drawable
+                .build();
+        imageLoader.displayImage("file:///" + this.getFilesDir() +"/"+url, imageView);
+        itemView.setOnLongClickListener(new LongPressListener());
+        mGrid.addView(itemView);
+    }
+
+    public String addNewImageToDB(Bitmap image){
+        String url = MyUtils.IMAGE_FOLDER_URL + System.currentTimeMillis();
+        MyUtils.saveImageToInternalStorage(image, url, this);
+        DatabaseHandler db = new DatabaseHandler(this);
+        Image newImage = new Image(url, mImages.size(), mExercise.getId());
+        db.addImage(newImage);
+        mImages.add(newImage);
+        return url;
     }
 }

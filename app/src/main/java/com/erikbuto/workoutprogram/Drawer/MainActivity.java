@@ -36,12 +36,10 @@ import com.erikbuto.workoutprogram.DB.Program;
 import com.erikbuto.workoutprogram.DB.Set;
 import com.erikbuto.workoutprogram.DeleteDialogFragment;
 import com.erikbuto.workoutprogram.Home.ManageProgramFragment;
-import com.erikbuto.workoutprogram.Home.NewExerciseNameDialogFragment;
 import com.erikbuto.workoutprogram.Home.NoExercisesFragment;
 import com.erikbuto.workoutprogram.Home.TabsAdapter;
 import com.erikbuto.workoutprogram.Manage.ManageExerciseActivity;
-import com.erikbuto.workoutprogram.Manage.SetListFragment;
-import com.erikbuto.workoutprogram.MyUtils;
+import com.erikbuto.workoutprogram.Utils.MyUtils;
 import com.erikbuto.workoutprogram.SetNameDialogFragment;
 import com.erikbuto.workoutprogram.R;
 
@@ -349,6 +347,11 @@ public class MainActivity extends ActionBarActivity {
     private void populateDB() {
         DatabaseHandler db = new DatabaseHandler(this);
         db.deleteAllPrograms();
+        db.deleteAllExercises();
+        db.deleteAllSets();
+        db.deleteAllImages();
+        db.deleteAllMuscles();
+
         long idRavi = db.addProgram(new Program("Half-body"));
         long idPushups = db.addExercise(new Exercise("Barbell Rear Delt Row c'est la fête au camping", idRavi, 0, "While keeping the upper arms perpendicular to the torso, " +
                 "pull the barbell up towards your upper chest as you squeeze the " +

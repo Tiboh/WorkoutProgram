@@ -76,12 +76,13 @@
     <string name="overview_muscle_secondary_header">Auxiliary</string>
     <string name="title_activity_edit_overview">Edit exercise</string>
     <string name="new_muscle">New muscle</string>
+    <string name="delete_image">Delete image</string>
+
 
     <string-array name="muscles_list">
         <item>Abdominals</item>
         <item>Arms</item>
-        <item>Middle Back</item>
-        <item>Lower Back</item>
+        <item>Back</item>
         <item>Biceps</item>
         <item>Calves</item>
         <item>Chest</item>
