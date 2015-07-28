@@ -1,14 +1,9 @@
 package com.erikbuto.workoutprogram.Drawer;
 
-import java.net.URL;
 import java.util.ArrayList;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -17,7 +12,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,7 +24,6 @@ import android.widget.TextView;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
-import com.erikbuto.workoutprogram.DB.Image;
 import com.erikbuto.workoutprogram.DB.Muscle;
 import com.erikbuto.workoutprogram.DB.Program;
 import com.erikbuto.workoutprogram.DB.Set;
@@ -39,7 +32,7 @@ import com.erikbuto.workoutprogram.Home.ManageProgramFragment;
 import com.erikbuto.workoutprogram.Home.NoExercisesFragment;
 import com.erikbuto.workoutprogram.Home.TabsAdapter;
 import com.erikbuto.workoutprogram.Manage.ManageExerciseActivity;
-import com.erikbuto.workoutprogram.Utils.MyUtils;
+import com.erikbuto.workoutprogram.Run.RunActivity;
 import com.erikbuto.workoutprogram.SetNameDialogFragment;
 import com.erikbuto.workoutprogram.R;
 
@@ -191,6 +184,15 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 addNewExercise();
+            }
+        });
+        final FloatingActionButton runFloatingButton = (FloatingActionButton) findViewById(R.id.button_run_program);
+        runFloatingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, RunActivity.class);
+                intent.putExtra(RunActivity.ARG_PROGRAM_ID, mProgram.getId());
+                startActivity(intent);
             }
         });
         // ((CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar)).setTitle(mProgram.getName());

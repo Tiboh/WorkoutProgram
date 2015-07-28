@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayout;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -18,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ScrollView;
-import android.widget.TextView;
 
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
@@ -46,7 +44,7 @@ public class ManageProgramFragment extends Fragment {
     private ArrayList<Exercise> mExercises;
 
     private RecyclerView mRecyclerView;
-    private CardViewAdapter mCardViewAdapter;
+    private HomeCardViewAdapter mCardViewAdapter;
 
     public static final String ARG_PROGRAM_ID = "program_id";
 
@@ -63,7 +61,7 @@ public class ManageProgramFragment extends Fragment {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         // mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
-        mCardViewAdapter = new CardViewAdapter(mExercises, getActivity());
+        mCardViewAdapter = new HomeCardViewAdapter(mExercises, getActivity());
         mRecyclerView.setAdapter(mCardViewAdapter);
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
                     @Override

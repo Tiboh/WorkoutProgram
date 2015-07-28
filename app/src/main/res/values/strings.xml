@@ -79,6 +79,7 @@
     <string name="delete_image">Delete image</string>
     <string name="image_loading">Loading... Please wait</string>
 
+    <string name="title_activity_run">Training</string>
 
     <string-array name="muscles_list">
         <item>Abdominals</item>

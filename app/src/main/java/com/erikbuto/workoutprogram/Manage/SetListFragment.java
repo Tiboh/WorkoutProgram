@@ -81,6 +81,7 @@ public class SetListFragment extends Fragment {
         db.addSet(newSet);
         mSets.add(position, newSet);
         mAdapter.add(newSet);
+        mAdapter.notifyDataSetChanged();
     }
 
     private class DynamicListViewOnItemMovedListener implements OnItemMovedListener {

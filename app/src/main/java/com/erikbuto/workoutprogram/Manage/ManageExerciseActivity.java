@@ -110,6 +110,8 @@ public class ManageExerciseActivity extends ActionBarActivity {
                         mFloatingButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                // ((SetListFragment) mTabsAdapter.getItem(POSITION_SETS_TAB)).addNewSet();
+                                // ((SetListFragment) mTabLayout.getChildAt(POSITION_SETS_TAB)).getContext();
                                 ((SetListFragment) mTabsAdapter.getItem(POSITION_SETS_TAB)).addNewSet();
                             }
                         });
@@ -155,7 +157,7 @@ public class ManageExerciseActivity extends ActionBarActivity {
             mTabLayout.removeTabAt(POSITION_SETS_TAB);
             Bundle argNoSetsFragment = new Bundle();
             argNoSetsFragment.putLong(NoSetFragment.ARG_EXERCISE_ID, mExercise.getId());
-            mTabsAdapter.addTab(mTabLayout.newTab(), NoSetFragment.class, argNoSetsFragment, getString(R.string.tab_title_sets));
+            // mTabsAdapter.addTab(mTabLayout.newTab(), NoSetFragment.class, argNoSetsFragment, getString(R.string.tab_title_sets));
         }
     }
 

@@ -60,7 +60,7 @@ public class DynamicListAdapter extends ArrayAdapter<Set> {
             rootView = LayoutInflater.from(mContext).inflate(mResourceLayoutId, parent, false);
         }
         TextView setSummary = (TextView) rootView.findViewById(R.id.set_summary);
-        setSummary.setText(MyUtils.stringifySet(mItems.get(position), mContext.getString(R.string.set_summary_divider), mContext.getString(R.string.weight_unit), mContext.getString(R.string.label_rep)));
+        setSummary.setText(MyUtils.stringifySet(mItems.get(position), mContext));
 
         ImageView deleteButton = (ImageView) rootView.findViewById(R.id.action_delete_set);
         deleteButton.setOnClickListener(new View.OnClickListener() {

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.erikbuto.workoutprogram.DB.Set;
+import com.erikbuto.workoutprogram.R;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,14 +24,14 @@ public abstract class MyUtils {
 
     public static final String IMAGE_FOLDER_URL = "exerciseImages/";
 
-    public static String stringifySet(Set set, String summaryDivider, String weightUnit, String labelRep) {
-        String rep = Integer.toString(set.getNbRep()); // + " " + labelRep;
+    public static String stringifySet(Set set, Context context) {
+        String rep = Integer.toString(set.getNbRep()); // + " " + context.getString(R.string.label_rep);
 
         if (set.getWeight() == 0) {
             return rep;
         } else {
-            String X = summaryDivider;
-            String weight = Integer.toString(set.getWeight()) + weightUnit;
+            String X = context.getString(R.string.set_summary_divider);
+            String weight = Integer.toString(set.getWeight()) + context.getString(R.string.weight_unit);
             return rep + X + weight;
         }
     }

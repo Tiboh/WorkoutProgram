@@ -20,7 +20,7 @@ import java.util.Collections;
 /**
  * Created by Utilisateur on 22/07/2015.
  */
-public class CardViewAdapter extends RecyclerView.Adapter<CardViewHolder> {
+public class HomeCardViewAdapter extends RecyclerView.Adapter<HomeCardViewHolder> {
 
     ArrayList<Exercise> list;
     private Context mContext;
@@ -28,7 +28,7 @@ public class CardViewAdapter extends RecyclerView.Adapter<CardViewHolder> {
     public static final String FROM_INTERNAL_STORAGE = "internal";
     public static final String FROM_CACHE = "cache";
 
-    public CardViewAdapter(ArrayList<Exercise> list, Context context) {
+    public HomeCardViewAdapter(ArrayList<Exercise> list, Context context) {
         this.list = list;
         this.mContext = context;
     }
@@ -38,13 +38,13 @@ public class CardViewAdapter extends RecyclerView.Adapter<CardViewHolder> {
     }
 
     @Override
-    public CardViewHolder onCreateViewHolder(ViewGroup viewGroup, int itemType) {
+    public HomeCardViewHolder onCreateViewHolder(ViewGroup viewGroup, int itemType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.fragment_manage_program_item,viewGroup,false);
-        return new CardViewHolder(view);
+        return new HomeCardViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(CardViewHolder myViewHolder, int position) {
+    public void onBindViewHolder(HomeCardViewHolder myViewHolder, int position) {
         Exercise myObject = list.get(position);
         DatabaseHandler db = new DatabaseHandler(mContext);
         ArrayList<Image> images = db.getAllImagesExercise(myObject.getId());
