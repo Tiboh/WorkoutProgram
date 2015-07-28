@@ -25,6 +25,7 @@ import com.erikbuto.workoutprogram.Utils.MyUtils;
 import com.erikbuto.workoutprogram.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,13 +35,16 @@ import java.util.regex.Pattern;
 public class OverviewFragment extends Fragment implements BaseSliderView.OnSliderClickListener {
 
     private SliderLayout mSliderShow;
+    private View mRootView;
+    private LayoutInflater mInflater;
+    private ViewGroup mContainer;
     public static final String ARG_BUNDLE_SLIDER = "image_id";
 
     public static final String ARG_EXERCISE_ID = "exercise_id";
     private Exercise mExercise;
-    private ArrayList<Image> mImages;
-    private ArrayList<Muscle> mPrimaryMuscles;
-    private ArrayList<Muscle> mSecondaryMuscles;
+    private ArrayList<Image> mImages = new ArrayList<>();
+    private ArrayList<Muscle> mPrimaryMuscles = new ArrayList<>();
+    private ArrayList<Muscle> mSecondaryMuscles = new ArrayList<>();
 
     public OverviewFragment() {
         // Empty constructor required for fragment subclasses
@@ -49,22 +53,26 @@ public class OverviewFragment extends Fragment implements BaseSliderView.OnSlide
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        mInflater = inflater;
+        mContainer = container;
+
         DatabaseHandler db = new DatabaseHandler(getActivity());
         mExercise = db.getExercise(getArguments().getLong(OverviewFragment.ARG_EXERCISE_ID));
         mImages = db.getAllImagesExercise(mExercise.getId());
+        Collections.sort(mImages, new Image.ImageComparator());
         mPrimaryMuscles = db.getAllPrimaryMuscleExercise(mExercise.getId());
         mSecondaryMuscles = db.getAllSecondaryMuscleExercise(mExercise.getId());
 
-        View rootView;
         if (mImages.isEmpty() && mExercise.getDescription().isEmpty() && mPrimaryMuscles.isEmpty() && mSecondaryMuscles.isEmpty()) {
-            rootView = inflater.inflate(R.layout.fragment_nooverview, container, false);
+            mRootView = inflater.inflate(R.layout.fragment_nooverview, container, false);
         } else {
-            rootView = inflater.inflate(R.layout.fragment_overview, container, false);
+            mRootView = inflater.inflate(R.layout.fragment_overview, container, false);
             if (!mImages.isEmpty()) {
-                FrameLayout rootLayout = (FrameLayout) rootView.findViewById(R.id.overview_frame_image);
-                View v = rootView.inflate(getActivity(), R.layout.overview_image_view, rootLayout);
+                FrameLayout rootLayoutImage = (FrameLayout) mRootView.findViewById(R.id.overview_frame_image);
+                View parentImageView = mRootView.inflate(getActivity(), R.layout.overview_image_view, rootLayoutImage);
 
-                mSliderShow = (SliderLayout) v.findViewById(R.id.image_slider);
+                mSliderShow = (SliderLayout) parentImageView.findViewById(R.id.image_slider);
 
                 for (int i = 0; i < mImages.size(); i++) {
                     DefaultSliderView sliderView = new DefaultSliderView(getActivity());
@@ -75,14 +83,15 @@ public class OverviewFragment extends Fragment implements BaseSliderView.OnSlide
                     mSliderShow.addSlider(sliderView);
                 }
 
-                if(mImages.size() == 1){
+                if (mImages.size() == 1) {
                     mSliderShow.stopAutoCycle();
                 }
             }
 
+
             if (!mExercise.getDescription().isEmpty()) {
-                FrameLayout rootLayout = (FrameLayout) rootView.findViewById(R.id.overview_frame_description);
-                View v = rootView.inflate(getActivity(), R.layout.overview_description_view, rootLayout);
+                FrameLayout rootLayout = (FrameLayout) mRootView.findViewById(R.id.overview_frame_description);
+                View v = mRootView.inflate(getActivity(), R.layout.overview_description_view, rootLayout);
 
                 // Fill in any details dynamically here
                 TextView textDescription = (TextView) v.findViewById(R.id.overview_description);
@@ -90,8 +99,8 @@ public class OverviewFragment extends Fragment implements BaseSliderView.OnSlide
             }
 
             if (!mPrimaryMuscles.isEmpty() || !mSecondaryMuscles.isEmpty()) {
-                FrameLayout rootLayout = (FrameLayout) rootView.findViewById(R.id.overview_frame_muscle);
-                View v = rootView.inflate(getActivity(), R.layout.overview_muscle_view, rootLayout);
+                FrameLayout rootLayout = (FrameLayout) mRootView.findViewById(R.id.overview_frame_muscle);
+                View v = mRootView.inflate(getActivity(), R.layout.overview_muscle_view, rootLayout);
 
                 if (!mPrimaryMuscles.isEmpty()) {
                     FrameLayout framePrimary = (FrameLayout) v.findViewById(R.id.muscle_primary_frame);
@@ -127,25 +136,25 @@ public class OverviewFragment extends Fragment implements BaseSliderView.OnSlide
             }
         }
 
-        return rootView;
+        return mRootView;
     }
 
-    public void chipsifyMyTextView(TextView myTextView, String myText){
+    public void chipsifyMyTextView(TextView myTextView, String myText) {
         String regex = "\\w+";
         Pattern p = Pattern.compile(regex);
         Matcher matcher = p.matcher(myText);
         SpannableStringBuilder sb = new SpannableStringBuilder(myText);
         while (matcher.find()) {
             final LayoutInflater layoutInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            final View parent =  (View) layoutInflater.inflate(R.layout.muscle_token, null);
-            final TextView oneWord =  (TextView) parent.findViewById(R.id.muscle_name);
+            final View parent = (View) layoutInflater.inflate(R.layout.muscle_token, null);
+            final TextView oneWord = (TextView) parent.findViewById(R.id.muscle_name);
             final int begin = matcher.start();
             final int end = matcher.end();
             float pixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15, getResources().getDisplayMetrics());
             oneWord.setTextSize(pixels);
             oneWord.setText(myText.substring(begin, end).toString());
             BitmapDrawable bd = new BitmapDrawable(MyUtils.convertViewToDrawable(oneWord));
-            bd.setBounds(0, 0, bd.getIntrinsicWidth(),bd.getIntrinsicHeight());
+            bd.setBounds(0, 0, bd.getIntrinsicWidth(), bd.getIntrinsicHeight());
             sb.setSpan(new ImageSpan(bd), begin, end, 0); // Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         }
         myTextView.setText(sb);
@@ -160,7 +169,7 @@ public class OverviewFragment extends Fragment implements BaseSliderView.OnSlide
 
     @Override
     public void onStop() {
-        if(mSliderShow != null) {
+        if (mSliderShow != null) {
             mSliderShow.stopAutoCycle();
         }
         super.onStop();

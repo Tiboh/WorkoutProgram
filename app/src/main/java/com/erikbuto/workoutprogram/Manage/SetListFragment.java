@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Set;
 import com.erikbuto.workoutprogram.R;
+import com.erikbuto.workoutprogram.Utils.MyUtils;
 import com.nhaarman.listviewanimations.ArrayAdapter;
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
 import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.OnItemMovedListener;
@@ -54,7 +55,7 @@ public class SetListFragment extends Fragment {
         dynamicListView.setDraggableManager(new TouchViewDraggableManager(R.id.grip_view));
         mAdapter = new DynamicListAdapter(getActivity(), R.layout.fragment_set_list_item, mSets, this);
         dynamicListView.setAdapter(mAdapter);
-        dynamicListView.setOnItemMovedListener(new DynamicListViewOnItemMovedListener(mAdapter));
+        // dynamicListView.setOnItemMovedListener(new DynamicListViewOnItemMovedListener(mAdapter));
         dynamicListView.setOnItemClickListener(new DynamicListViewOnItemClickListener(dynamicListView, mExerciseId, mAdapter));
 
         return rootView;
@@ -93,6 +94,7 @@ public class SetListFragment extends Fragment {
         public void onItemMoved(final int originalPosition, final int newPosition) {
             ArrayList<Set> swapped = swapSets((ArrayList<Set>) mAdapter.getItems(), originalPosition, newPosition);
             updateDBSet(swapped);
+            mAdapter.notifyDataSetChanged();
         }
     }
 

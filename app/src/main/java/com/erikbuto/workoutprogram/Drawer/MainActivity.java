@@ -364,30 +364,6 @@ public class MainActivity extends ActionBarActivity {
         long idPress = db.addExercise(new Exercise("Cable Chest Press ", idRavi, 4, new String()));
         long idFlyPress = db.addExercise(new Exercise("Cable Fly Press ", idRavi, 5, new String()));
 
-        try {
-            ////---- ONLY FOR TESTING -----//// TO DELETE
-            if( Build.VERSION.SDK_INT >= 9){
-                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                StrictMode.setThreadPolicy(policy);
-            }
-            ////----------------------------------------////
-            ArrayList<URL> urls = new ArrayList<>();
-            urls.add(new URL("http://www.amazingbodynow.com/wp-content/uploads/2012/08/exercise.jpg"));
-            urls.add(new URL("http://www.sweatlikeapig.com/wp-content/uploads/2012/12/Bird-Dog-exercise.jpg"));
-            urls.add(new URL("http://www.myynow.org/wp-content/uploads/2010/04/stab.-ball.jpg"));
-            urls.add(new URL("http://www.ibodz.com/files/exerciseimages/bench-press-on-fitball--1.jpg"));
-            for(int i = 0 ; i < urls.size(); i++) {
-                Bitmap bmp = BitmapFactory.decodeStream(urls.get(i).openConnection().getInputStream());
-                String url = MyUtils.IMAGE_FOLDER_URL+System.currentTimeMillis();
-                MyUtils.saveImageToInternalStorage(bmp, url, this);
-                db.addImage(new Image(url, 0, idPushups));
-            }
-        }catch (java.net.MalformedURLException e){
-            Log.e("Download and add image", e.getMessage());
-        }catch(java.io.IOException e){
-            Log.e("Download and add image", e.getMessage());
-        }
-
         db.addMuscle(new Muscle("Ischio", Muscle.MUSCLE_TYPE_PRIMARY, idPushups));
         db.addMuscle(new Muscle("Quadriceps", Muscle.MUSCLE_TYPE_PRIMARY, idPushups));
         db.addMuscle(new Muscle("Trapez", Muscle.MUSCLE_TYPE_SECONDARY, idPushups));

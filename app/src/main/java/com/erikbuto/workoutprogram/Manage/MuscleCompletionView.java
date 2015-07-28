@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Muscle;
 import com.erikbuto.workoutprogram.R;
 import com.tokenautocomplete.TokenCompleteTextView;
@@ -20,9 +21,11 @@ public class MuscleCompletionView extends TokenCompleteTextView<Muscle> {
 
     private String mType;
     private long mExerciseId;
+    private Context mContext;
 
     public MuscleCompletionView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mContext = context;
     }
 
     @Override
@@ -38,7 +41,10 @@ public class MuscleCompletionView extends TokenCompleteTextView<Muscle> {
     @Override
     protected Muscle defaultObject(String completionText) {
         //Stupid simple example of guessing if we have an email or not
-        return new Muscle(completionText, mType, mExerciseId);
+        DatabaseHandler db = new DatabaseHandler(mContext);
+        Muscle newMuscle = new Muscle(completionText, mType, mExerciseId);
+        db.addMuscle(newMuscle);
+        return newMuscle;
     }
 
     public void setmType(String mType) {

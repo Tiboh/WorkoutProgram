@@ -105,7 +105,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         String CREATE_IMAGE_TABLE = "CREATE TABLE " + TABLE_IMAGE + "("
                 + IMAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + IMAGE_URL + " TEXT NOT NULL,"
+                + IMAGE_URL + " TEXT UNIQUE NOT NULL,"
                 + IMAGE_POSITION + " INTEGER NOT NULL,"
                 + IMAGE_EXERCISE_ID + " INTEGER NOT NULL,"
                 + "FOREIGN KEY (" + IMAGE_EXERCISE_ID + ") REFERENCES " + TABLE_EXERCISE + "(" + EXERCISE_ID + ")" + ")";
@@ -459,7 +459,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return imageList;
     }
 
-    public ArrayList<Muscle> getAllMuscleExercise(long exerciseId) {
+    public ArrayList<Muscle> getAllMusclesExercise(long exerciseId) {
         ArrayList<Muscle> muscleList = new ArrayList<Muscle>();
         // Select All Query
         String selectQuery = "SELECT  * FROM " + TABLE_MUSCLE + " WHERE " + MUSCLE_EXERCISE_ID + "=" + exerciseId;
@@ -673,6 +673,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_MUSCLE, MUSCLE_ID + " = ?",
                 new String[]{String.valueOf(muscle.getId())});
+        db.close();
+    }
+
+    public void deleteMuscleFromId(long id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_MUSCLE, MUSCLE_ID + " = ?",
+                new String[]{String.valueOf(id)});
         db.close();
     }
 

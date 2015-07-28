@@ -3,17 +3,20 @@ package com.erikbuto.workoutprogram.Manage;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayout;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -32,11 +35,14 @@ import com.erikbuto.workoutprogram.DB.DatabaseHandler;
 import com.erikbuto.workoutprogram.DB.Exercise;
 import com.erikbuto.workoutprogram.DB.Image;
 import com.erikbuto.workoutprogram.DB.Muscle;
+import com.erikbuto.workoutprogram.DB.Program;
+import com.erikbuto.workoutprogram.DeleteDialogFragment;
 import com.erikbuto.workoutprogram.Utils.MyUtils;
 import com.erikbuto.workoutprogram.R;
 import com.erikbuto.workoutprogram.Utils.SquareImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.tokenautocomplete.TokenCompleteTextView;
 
 import org.w3c.dom.Text;
 
@@ -45,9 +51,10 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class EditOverviewActivity extends ActionBarActivity {
+public class EditOverviewActivity extends ActionBarActivity implements TokenCompleteTextView.TokenListener {
 
     public static final String ARG_EXERCISE_ID = "exercise_id";
     private Toolbar mToolbar;
@@ -66,7 +73,6 @@ public class EditOverviewActivity extends ActionBarActivity {
     private AtomicBoolean mIsScrolling = new AtomicBoolean(false);
     private int mIndexStart;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +81,7 @@ public class EditOverviewActivity extends ActionBarActivity {
         DatabaseHandler db = new DatabaseHandler(this);
         mExercise = db.getExercise(getIntent().getExtras().getLong(OverviewFragment.ARG_EXERCISE_ID));
         mImages = db.getAllImagesExercise(mExercise.getId());
+        Collections.sort(mImages, new Image.ImageComparator());
         mPrimaryMuscles = db.getAllPrimaryMuscleExercise(mExercise.getId());
         mSecondaryMuscles = db.getAllSecondaryMuscleExercise(mExercise.getId());
         Collections.sort(mImages, new Image.ImageComparator());
@@ -83,10 +90,10 @@ public class EditOverviewActivity extends ActionBarActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle(getString(R.string.title_activity_edit_overview));
         getSupportActionBar().setSubtitle(mExercise.getName());
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_check);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back_arrow);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        EditText mDescriptionView = (EditText) findViewById(R.id.edit_overview_description);
+        mDescriptionView = (EditText) findViewById(R.id.edit_overview_description);
         mDescriptionView.setText(mExercise.getDescription());
 
 
@@ -94,41 +101,38 @@ public class EditOverviewActivity extends ActionBarActivity {
         addImageTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(Build.VERSION.SDK_INT >= 16) {
+                if (Build.VERSION.SDK_INT >= 16) {
                     startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT).putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true).setType("image/*"), SELECT_PHOTO);
-                }else{
+                } else {
                     startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT).putExtra(Intent.ACTION_PICK, true).setType("image/*"), SELECT_PHOTO);
                 }
             }
         });
 
-        if (!mImages.isEmpty()) {
-            mGrid = (GridLayout) findViewById(R.id.grid_layout);
-            mScrollView = (ScrollView) findViewById(R.id.scroll_view);
-            mScrollView.setSmoothScrollingEnabled(true);
+        mGrid = (GridLayout) findViewById(R.id.grid_layout);
+        mScrollView = (ScrollView) findViewById(R.id.scroll_view);
+        mScrollView.setSmoothScrollingEnabled(true);
 
-            for (int i = 0; i < mImages.size(); i++) {
-                addImageToGridView(mImages.get(i).getUrl());
-            }
-
-            // Purely aesthetic
-            switch (mImages.size()) {
-                case 1:
-                    mGrid.setColumnCount(1);
-                    break;
-                case 2:
-                    mGrid.setColumnCount(2);
-                    break;
-                case 4:
-                    mGrid.setColumnCount(2);
-                    break;
-                default:
-                    mGrid.setColumnCount(3);
-                    break;
-            }
-            mGrid.setOnDragListener(new CardDragListener());
-            registerForContextMenu(mGrid);
+        for (int i = 0; i < mImages.size(); i++) {
+            addImageToGridView(mImages.get(i).getId());
         }
+
+        // Purely aesthetic
+        switch (mImages.size()) {
+            case 1:
+                mGrid.setColumnCount(1);
+                break;
+            case 2:
+                mGrid.setColumnCount(2);
+                break;
+            case 4:
+                mGrid.setColumnCount(2);
+                break;
+            default:
+                mGrid.setColumnCount(3);
+                break;
+        }
+        mGrid.setOnDragListener(new CardDragListener());
 
         String[] muscles = getResources().getStringArray(R.array.muscles_list);
         ArrayList<Muscle> allMuscles = new ArrayList<>();
@@ -141,6 +145,7 @@ public class EditOverviewActivity extends ActionBarActivity {
         completionViewPrimary.setmExerciseId(mExercise.getId());
         completionViewPrimary.setmType(Muscle.MUSCLE_TYPE_PRIMARY);
         completionViewPrimary.setAdapter(adapterPrimary);
+        completionViewPrimary.setTokenListener(this);
         for (int i = 0; i < mPrimaryMuscles.size(); i++) {
             completionViewPrimary.addObject(mPrimaryMuscles.get(i));
         }
@@ -150,6 +155,7 @@ public class EditOverviewActivity extends ActionBarActivity {
         completionViewSecondary.setmExerciseId(mExercise.getId());
         completionViewSecondary.setmType(Muscle.MUSCLE_TYPE_SECONDARY);
         completionViewSecondary.setAdapter(adapterSecondary);
+        completionViewSecondary.setTokenListener(this);
         for (int i = 0; i < mSecondaryMuscles.size(); i++) {
             completionViewSecondary.addObject(mSecondaryMuscles.get(i));
         }
@@ -158,6 +164,30 @@ public class EditOverviewActivity extends ActionBarActivity {
         completionViewPrimary.setSplitChar(splitChar);
         completionViewSecondary.allowDuplicates(false);
         completionViewSecondary.setSplitChar(splitChar);
+
+    }
+
+    @Override
+    public void onTokenAdded(Object token) {
+        // The adding is done in MuscleCompletionView.class cause of redundant on adding
+    }
+
+    @Override
+    public void onTokenRemoved(Object token) {
+        DatabaseHandler db = new DatabaseHandler(this);
+        db.deleteMuscleFromId(((Muscle) token).getId());
+        if(((Muscle) token).getType() == Muscle.MUSCLE_TYPE_PRIMARY) {
+            mPrimaryMuscles.remove((Muscle) token);
+        }else{
+            mSecondaryMuscles.remove((Muscle) token);
+        }    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        DatabaseHandler db = new DatabaseHandler(this);
+        mExercise.setDescription(mDescriptionView.getText().toString());
+        db.updateExercise(mExercise);
     }
 
     private class CardDragListener implements View.OnDragListener {
@@ -204,9 +234,17 @@ public class EditOverviewActivity extends ActionBarActivity {
                     if (!event.getResult()) {
                         view.setVisibility(View.VISIBLE);
                     }
+                    updateImagesInDB();
                     break;
             }
             return true;
+        }
+    }
+
+    public void updateImagesInDB(){
+        DatabaseHandler db = new DatabaseHandler(this);
+        for(int i = 0 ; i < mImages.size() ; i++){
+            db.updateImage(mImages.get(i));
         }
     }
 
@@ -221,13 +259,6 @@ public class EditOverviewActivity extends ActionBarActivity {
             mIndexStart = calculateNewIndex(view.getX(), view.getY());
 
             return true;
-        }
-    }
-
-    private class ShortPressListener implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-
         }
     }
 
@@ -304,7 +335,7 @@ public class EditOverviewActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case android.R.id.home:
-                //// RETURN ACTIVITY WITH RESULT
+                onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -338,57 +369,157 @@ public class EditOverviewActivity extends ActionBarActivity {
             case SELECT_PHOTO:
                 if (resultCode == RESULT_OK) {
 
-                    if(Build.VERSION.SDK_INT >= 16) {
+                    if (Build.VERSION.SDK_INT >= 16 && imageReturnedIntent.getClipData() != null) {
                         ClipData clipData = imageReturnedIntent.getClipData();
-                        for (int i = 0; i < clipData.getItemCount(); i++) {
-                            Uri selectedImage = clipData.getItemAt(i).getUri();
-                            InputStream imageStream = null;
-                            try {
-                                imageStream = getContentResolver().openInputStream(selectedImage);
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                            Bitmap yourSelectedImage = BitmapFactory.decodeStream(imageStream);
-                            String url = addNewImageToDB(yourSelectedImage);
-                            addImageToGridView(url);
-                        }
-                    }else{
+                        new LoadingNewImages().execute(clipData);
+                    } else {
                         Uri selectedImage = imageReturnedIntent.getData();
-                        InputStream imageStream = null;
-                        try {
-                            imageStream = getContentResolver().openInputStream(selectedImage);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                        Bitmap yourSelectedImage = BitmapFactory.decodeStream(imageStream);
-                        String url = addNewImageToDB(yourSelectedImage);
-                        addImageToGridView(url);
+                        new LoadingNewImage().execute(selectedImage);
                     }
                 }
                 break;
         }
     }
 
-    public void addImageToGridView(String url){
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(this, ManageExerciseActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        intent.putExtra(ManageExerciseActivity.ARG_EXERCISE_ID, mExercise.getId());
+        intent.putExtra(ManageExerciseActivity.FROM_EDIT_OVERVIEW_ACTIVITY, true);
+        startActivity(intent);
+    }
+
+    public void deleteImage(Image image) {
+        int indice = -1;
+        for(int i = 0 ; i < mImages.size() ; i++){
+            if(mImages.get(i).getId() == image.getId()){
+                indice = i;
+            }
+        }
+        mImages.remove(indice);
+        mGrid.removeViewAt(indice);
+        for(int i = 0 ; i < mImages.size() ; i++){
+            mImages.get(i).setPosition(i);
+        }
+        updateImagesInDB();
+    }
+
+    public void addImageToGridView(final long id) {
         final LayoutInflater inflater = LayoutInflater.from(this);
         final View itemView = inflater.inflate(R.layout.overview_edit_square_image_item, mGrid, false);
         final SquareImageView imageView = (SquareImageView) itemView.findViewById(R.id.overview_edit_image_item);
         ImageLoader imageLoader = ImageLoader.getInstance();
-        DisplayImageOptions options = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.abc_spinner_mtrl_am_alpha) // resource or drawable
-                .build();
-        imageLoader.displayImage("file:///" + this.getFilesDir() +"/"+url, imageView);
+        DatabaseHandler db = new DatabaseHandler(this);
+        final Image myNewImage = db.getImage(id);
+        imageLoader.displayImage("file://" + this.getFilesDir() + "/" + myNewImage.getUrl(), imageView);
         itemView.setOnLongClickListener(new LongPressListener());
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DeleteDialogFragment dialogDelete = new DeleteDialogFragment();
+                Bundle arg = new Bundle();
+                arg.putString(DeleteDialogFragment.ARG_DATA_TYPE, DeleteDialogFragment.ARG_TYPE_IMAGE);
+                arg.putLong(DeleteDialogFragment.ARG_IMAGE_ID, myNewImage.getId());
+                dialogDelete.setArguments(arg);
+                dialogDelete.show(getSupportFragmentManager(), "TAG");
+            }
+        });
         mGrid.addView(itemView);
     }
 
-    public String addNewImageToDB(Bitmap image){
-        String url = MyUtils.IMAGE_FOLDER_URL + System.currentTimeMillis();
-        MyUtils.saveImageToInternalStorage(image, url, this);
-        DatabaseHandler db = new DatabaseHandler(this);
+    public long addNewImageToDB(Bitmap image) {
+        String url = MyUtils.generateImageUrl();
+        MyUtils.saveImageToInternalStorage(image, url, EditOverviewActivity.this);
+        DatabaseHandler db = new DatabaseHandler(EditOverviewActivity.this);
         Image newImage = new Image(url, mImages.size(), mExercise.getId());
-        db.addImage(newImage);
+        long id = db.addImage(newImage);
         mImages.add(newImage);
-        return url;
+        sortImages();
+        return id;
+    }
+
+    public void sortImages() {
+        for (int i = 0; i < mImages.size(); i++) {
+            mImages.get(i).setPosition(i);
+        }
+    }
+
+    private class LoadingNewImage extends AsyncTask<Uri, Integer, Long> {
+        private ProgressDialog mDialog;
+
+        protected void onPreExecute() {
+            mDialog = new ProgressDialog(EditOverviewActivity.this);
+            mDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mDialog.setMessage(getString(R.string.image_loading));
+            mDialog.setIndeterminate(true);
+            mDialog.setCanceledOnTouchOutside(false);
+            mDialog.setCancelable(false);
+            mDialog.show();
+        }
+
+        protected Long doInBackground(Uri... uri) {
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(uri[0]);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            Bitmap yourSelectedImage = BitmapFactory.decodeStream(imageStream);
+            return addNewImageToDB(yourSelectedImage);
+        }
+
+        protected void onProgressUpdate(Integer... a) {
+        }
+
+        protected void onPostExecute(Long id) {
+            addImageToGridView(id);
+            mDialog.dismiss();
+        }
+    }
+
+
+    private class LoadingNewImages extends AsyncTask<ClipData, Integer, ArrayList<Long>> {
+        private ProgressDialog mDialog;
+
+        protected void onPreExecute() {
+            mDialog = new ProgressDialog(EditOverviewActivity.this);
+            mDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            mDialog.setMessage(getString(R.string.image_loading));
+            mDialog.setIndeterminate(false);
+            mDialog.setCanceledOnTouchOutside(false);
+            mDialog.show();
+        }
+
+        protected ArrayList<Long> doInBackground(ClipData... clipData) {
+            ArrayList<Long> ids = new ArrayList<>();
+            mDialog.setMax(clipData[0].getItemCount());
+            for (int i = 0; i < clipData[0].getItemCount(); i++) {
+                Uri selectedImage = clipData[0].getItemAt(i).getUri();
+                InputStream imageStream = null;
+                try {
+                    imageStream = getContentResolver().openInputStream(selectedImage);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                Bitmap yourSelectedImage = BitmapFactory.decodeStream(imageStream);
+                long id = addNewImageToDB(yourSelectedImage);
+                ids.add(id);
+                publishProgress(i);
+            }
+            return ids;
+        }
+
+        protected void onProgressUpdate(Integer... a) {
+            mDialog.setProgress(a[0]);
+        }
+
+        protected void onPostExecute(ArrayList<Long> ids) {
+            for (int i = 0; i < ids.size(); i++) {
+                addImageToGridView(ids.get(i));
+            }
+            mDialog.dismiss();
+        }
     }
 }

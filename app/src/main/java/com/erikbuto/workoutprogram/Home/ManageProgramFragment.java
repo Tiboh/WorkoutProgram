@@ -69,6 +69,7 @@ public class ManageProgramFragment extends Fragment {
                     @Override
                     public void onItemClick(View view, int position) {
                         Intent intent = new Intent(getActivity(), ManageExerciseActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         intent.putExtra(ManageExerciseActivity.ARG_EXERCISE_ID, mExercises.get(position).getId());
                         startActivity(intent);
                     }
@@ -175,6 +176,7 @@ public class ManageProgramFragment extends Fragment {
             int mIndexClicked = calculateNewIndex(view.getX(), view.getY());
             Intent intent = new Intent(getActivity(), ManageExerciseActivity.class);
             intent.putExtra(ManageExerciseActivity.ARG_EXERCISE_ID, mExercises.get(mIndexClicked).getId());
+            intent.putExtra(ManageExerciseActivity.FROM_EDIT_OVERVIEW_ACTIVITY, false);
             startActivity(intent);
         }
     }

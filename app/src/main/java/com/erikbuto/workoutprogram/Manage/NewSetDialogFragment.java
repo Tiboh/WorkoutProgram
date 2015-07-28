@@ -63,7 +63,7 @@ public class NewSetDialogFragment extends DialogFragment {
                         Set set = new Set(Integer.valueOf(valueRep.getText().toString()), Integer.valueOf(valueWeight.getText().toString()), Integer.valueOf(valueRestMinute.getText().toString()), Integer.valueOf(valueRestSecond.getText().toString()), mExerciseId, position);
                         long setId = db.addSet(set);
                         set.setId(setId);
-                        ((DynamicListAdapter) mAdapter).getItems().add(set);
+                        // ((DynamicListAdapter) mAdapter).getItems().add(set);
                         mAdapter.add(set);
                     }
                 })

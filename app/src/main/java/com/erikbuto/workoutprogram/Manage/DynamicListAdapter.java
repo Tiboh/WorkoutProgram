@@ -1,6 +1,7 @@
 package com.erikbuto.workoutprogram.Manage;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +45,7 @@ public class DynamicListAdapter extends ArrayAdapter<Set> {
 
     @Override
     public long getItemId(final int position) {
-        return getItem(position).hashCode();
+        return getItem(position).getId();
     }
 
     @Override

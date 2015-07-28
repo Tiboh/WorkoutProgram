@@ -44,8 +44,8 @@
     <string name="no_sets_detailed">Please add sets to become strong and stretched.</string>
     <string name="no_overview">This exercise have no information.</string>
     <string name="no_overview_detailed">Please modify it to add information.</string>
-
     <string name="message_delete">All the data will be deleted including stats</string>
+    <string name="action_delete_image">Delete image ?</string>
 
     <string name="edit_name">Edit name</string>
     <string name="title_activity_sort_exercises">SortExercisesActivity</string>
@@ -77,6 +77,7 @@
     <string name="title_activity_edit_overview">Edit exercise</string>
     <string name="new_muscle">New muscle</string>
     <string name="delete_image">Delete image</string>
+    <string name="image_loading">Loading... Please wait</string>
 
 
     <string-array name="muscles_list">

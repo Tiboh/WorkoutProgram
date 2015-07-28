@@ -12,14 +12,16 @@ import com.erikbuto.workoutprogram.DB.Set;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by Utilisateur on 16/07/2015.
  */
 public abstract class MyUtils {
 
-    public static final String IMAGE_FOLDER_URL = "exerciseImages";
+    public static final String IMAGE_FOLDER_URL = "exerciseImages/";
 
     public static String stringifySet(Set set, String summaryDivider, String weightUnit, String labelRep) {
         String rep = Integer.toString(set.getNbRep()); // + " " + labelRep;
@@ -67,7 +69,7 @@ public abstract class MyUtils {
             FileOutputStream fos = context.openFileOutput(fileUrl, Context.MODE_PRIVATE);
 
             // Writing the bitmap to the output stream
-            image.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            image.compress(Bitmap.CompressFormat.PNG, 90, fos);
             fos.close();
 
             return true;
@@ -75,6 +77,22 @@ public abstract class MyUtils {
             Log.e("saveToInternalStorage()", e.getMessage());
             return false;
         }
+    }
+
+    public static String saveImageToCache(Context context, Bitmap bitmap, String url){
+        File cacheDir = context.getCacheDir();
+        File f = new File(cacheDir, url);
+        try {
+            FileOutputStream out = new FileOutputStream(f);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+            out.flush();
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return f.getAbsolutePath();
     }
 
     public static Bitmap getImageFromInternalStorage(String url, Context context) {
@@ -109,5 +127,9 @@ public abstract class MyUtils {
         Bitmap viewBmp = cacheBmp.copy(Bitmap.Config.ARGB_8888, true);
         view.destroyDrawingCache();
         return viewBmp;
+    }
+
+    public static String generateImageUrl(){
+        return Long.toString(System.currentTimeMillis());
     }
 }

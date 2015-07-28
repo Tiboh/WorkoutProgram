@@ -58,7 +58,7 @@ public class EditSetDialogFragment extends DialogFragment {
                         mSet.setRestTimeSecond(Integer.valueOf(valueRestSecond.getText().toString()));
 
                         db.updateSet(mSet);
-                        ((DynamicListAdapter) mAdapter).setItem(mSet.getPosition(), mSet);
+                        // ((DynamicListAdapter) mAdapter).setItem(mSet.getPosition(), mSet);
                         mAdapter.notifyDataSetChanged();
                     }
                 })

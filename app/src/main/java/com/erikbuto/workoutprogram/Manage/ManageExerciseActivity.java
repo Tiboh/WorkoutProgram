@@ -33,6 +33,7 @@ public class ManageExerciseActivity extends ActionBarActivity {
     private TextView mTitleView;
 
     public static final String ARG_EXERCISE_ID = "exercise_id";
+    public static final String FROM_EDIT_OVERVIEW_ACTIVITY = "from_edit_overview";
 
     public static final int POSITION_SETS_TAB = 0;
     public static final int POSITION_OVERVIEW_TAB = 1;
@@ -119,7 +120,7 @@ public class ManageExerciseActivity extends ActionBarActivity {
                             @Override
                             public void onClick(View v) {
                                 Intent intent = new Intent(ManageExerciseActivity.this, EditOverviewActivity.class);
-                                intent.putExtra(ImageFullScreenActivity.ARG_EXERCISE_ID, mExercise.getId());
+                                intent.putExtra(EditOverviewActivity.ARG_EXERCISE_ID, mExercise.getId());
                                 startActivity(intent);
                             }
                         });
@@ -142,6 +143,10 @@ public class ManageExerciseActivity extends ActionBarActivity {
             }
         });
         pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
+
+        if(getIntent().getExtras().getBoolean(this.FROM_EDIT_OVERVIEW_ACTIVITY) == true){
+            mTabLayout.getTabAt(POSITION_OVERVIEW_TAB).select();
+        }
     }
 
     public void removeSet(Set set){
