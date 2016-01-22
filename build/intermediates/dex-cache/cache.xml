@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\Thibault\.gradle\caches\modules-2\files-2.1\com.nineoldandroids\library\2.4.0\e9b63380f3a242dbdbf103a2355ad7e43bad17cb\library-2.4.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="e9b63380f3a242dbdbf103a2355ad7e43bad17cb">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\library-2.4.0-7a380af0681c0d2ef986ac078503d3e800b3bdd8.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.daimajia.slider\library\1.0.9\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="c10ec5370368be16fe990157f09d18fbf76196d4">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-33018e00b36bbf6975c7cbe8425d70b69af11a53.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.nhaarman.listviewanimations\lib-core\3.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="acf66033b1418ccf9e15c8e77750981e4809c4ea">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-c900e8a2a5ebbb11f96dc4c6ad73299e11b5aebe.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\22.1.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="e0b0c35d02308b270015a74cada4887e2e49b889">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-b23fa8cf653ff30479cea4e12d6601834e2cc6dc.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.1.1\jars\libs\internal_impl-23.1.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="a4de9c81ae239414e1ed0f86441b02abaf29bca9">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\internal_impl-23.1.1-dbbe0df663b9e5d8cf9b4792842c52d36a385b14.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.1.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="6cbc7773921fcfedbe55657578f0cbfe614778dc">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-7e2bf3f997eb6e355aa789dfa64ba807b9edeb32.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\.gradle\caches\modules-2\files-2.1\com.nostra13.universalimageloader\universal-image-loader\1.9.4\dd9eeb557650c4ad7394df23f0f5cf27a7cfc697\universal-image-loader-1.9.4.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="dd9eeb557650c4ad7394df23f0f5cf27a7cfc697">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\universal-image-loader-1.9.4-4e19ab1e88356bc1a70364793e8138c281b68bad.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.nhaarman.listviewanimations\lib-manipulation\3.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="5660e4bf78904137e90e62a5d4cc2e987258f02c">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-af5cd2ae66ba561b15e4983930fca03c7e6f8ac5.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.android.support\design\22.2.0\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="fc63b820d54c8a27a3a614bdd93920e0076581c2">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-a5bed76eb5bc048b648bdbaa9792341ae7173f27.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.android.support\gridlayout-v7\22.1.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="2f958cff6198f222923ef646cbc17a7f38935c2b">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-6c7fe307a686a1b283d9630583e8fde077f7f20b.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\23.1.1\support-annotations-23.1.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="8d680ba5a623724d1fb0e81c36a790f023a6cede">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\support-annotations-23.1.1-31a7264d2b65f8770843fd208e33161876037d9c.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.pkmmte.view\circularimageview\1.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="c341a7ad32bc2eef9dcfab239262b77ac60788cc">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-f307f6a1b3193e81196efdc9e72d853f27e8e692.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\22.2.0\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="73753982da6bde518f3a4c6b372749981d14d1a0">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-bd1e78ffe1425e94882b9ee4d8ee0496e300347a.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.android.support\cardview-v7\22.1.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="22886d910315028a2b34b1ba068c265534ade87a">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-dc05a994c4b4f8f72a641e2bf73c1a0396cd4c2b.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\.gradle\caches\modules-2\files-2.1\com.squareup.picasso\picasso\2.3.2\d6b7f0093cec6c9faf65dbfd6a6a345d0ed25e27\picasso-2.3.2.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="d6b7f0093cec6c9faf65dbfd6a6a345d0ed25e27">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\picasso-2.3.2-0ca9f477ef2047e23ad79a1d9e2023d674c30126.jar" />
+    </item>
+    <item
+        jar="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\exploded-aar\com.splitwise\tokenautocomplete\2.0.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="8aaf5e16a3edff9a92b8d3bcb876c9a61724a257">
+        <dex dex="C:\Users\Thibault\Documents\Android Workout Project\WorkoutProgram\app\build\intermediates\pre-dexed\debug\classes-8ff2e181b661410a36d9fec3088f352bb50d3e37.jar" />
+    </item>
+
+</items>

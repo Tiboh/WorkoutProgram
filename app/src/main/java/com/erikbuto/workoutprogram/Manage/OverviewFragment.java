@@ -139,6 +139,12 @@ public class OverviewFragment extends Fragment implements BaseSliderView.OnSlide
         return mRootView;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mRootView.invalidate();
+    }
+
     public void chipsifyMyTextView(TextView myTextView, String myText) {
         String regex = "\\w+";
         Pattern p = Pattern.compile(regex);
